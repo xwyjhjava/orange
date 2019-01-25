@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.we.dreams</groupId>
+    <artifactId>dreams</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <modules></modules>
+
+    <packaging>pom</packaging>
+
+    <name>dreams</name>
+    <!--<url>http://www.ruoyi.vip</url>-->
+    <description>个人弹幕网站模块化版</description>
+
+    <!-- 继承父包 -->
+
+    <dependencies>
+
+    </dependencies>
+
+
+
+
+</project>
