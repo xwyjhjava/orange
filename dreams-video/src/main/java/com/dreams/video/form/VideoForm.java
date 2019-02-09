@@ -1,13 +1,12 @@
 package com.dreams.video.form;
 
-import org.springframework.web.multipart.MultipartFile;
-
-
 public class VideoForm {
+
     private String title;
+
     private String type;
-    private String tag;
-    private MultipartFile file;
+
+    private String tags;
 
     public String getTitle() {
         return title;
@@ -25,19 +24,11 @@ public class VideoForm {
         this.type = type;
     }
 
-    public String getTag() {
-        return tag;
+    public String getTags() {
+        return tags;
     }
 
-    public void setTag(String tag) {
-        this.tag = tag;
-    }
-
-    public MultipartFile getFile() {
-        return file;
-    }
-
-    public void setFile(MultipartFile file) {
-        this.file = file;
+    public void setTags(String tags) {
+        this.tags = tags;
     }
 }
