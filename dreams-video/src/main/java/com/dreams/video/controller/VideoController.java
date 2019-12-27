@@ -7,10 +7,6 @@ public class VideoController implements IVideoController {
 
     private String VideoName;
 
-    int videoURL = 0;
-
-
-
     @Override
     public void getVideo() {
 
