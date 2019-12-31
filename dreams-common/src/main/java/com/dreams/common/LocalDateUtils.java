@@ -3,6 +3,9 @@ package com.dreams.common;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
+import java.time.format.FormatStyle;
+import java.util.Date;
+import java.util.Locale;
 
 /**
  * @author ming
@@ -20,6 +23,10 @@ public class LocalDateUtils {
         System.out.println(getDateBefore("2019-12-30", 10, false, "yyyy-MM-dd"));
 
         System.out.println(getPeriodOfDay("03:53:20", "HH:mm:ss"));
+
+        System.out.println(getLocalByGMT(getGMTInstant().toString()));
+
+        System.out.println(getDatetimeFromInstant(LocalDateTime.now().toEpochSecond(ZoneOffset.of("+8"))));
     }
 
     //get Date
@@ -54,8 +61,8 @@ public class LocalDateUtils {
         }
     }
 
-    //获得当前时间时间戳
-    public static Instant getInstant(){
+    //获得GMT时间
+    public static Instant getGMTInstant(){
         return Instant.now();
     }
 
@@ -97,17 +104,30 @@ public class LocalDateUtils {
         return Period.between(start, end).getYears();
     }
 
-    //获得时间戳
+
 
     /**
      *
-     * @param date 传入的时间
+     * @param dateTime 传入的时间
      * @param format 时间格式化
-     * @return nano级的时间
+     * @return 时间戳（秒）
+     * @description localDateTime转时间戳(秒)
      */
-    public static int getNanoFromDate(String date, String format){
+    public static long getInstantFromDatetime(String dateTime, String format){
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(format);
-        return LocalDateTime.parse(date, formatter).getNano();
+        return LocalDateTime.parse(dateTime, formatter).toEpochSecond(ZoneOffset.of("+8"));
+    }
+
+    /**
+     *
+     * @param timestap 时间戳
+     * @return localDateTime
+     * @description 时间戳(秒) 转localDateTime
+     */
+    public static LocalDateTime getDatetimeFromInstant(long timestap){
+        Instant instant = Instant.ofEpochSecond(timestap);
+        LocalDateTime dateTime = LocalDateTime.ofInstant(instant, ZoneOffset.systemDefault());
+        return dateTime;
     }
 
     //获取某日期前或后某一天的日期
@@ -145,7 +165,6 @@ public class LocalDateUtils {
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(format);
         LocalTime flagTime = LocalTime.of(12,0,0);
-        System.out.println(flagTime);
         LocalTime localTime = LocalTime.parse(time, formatter);
         boolean flag = localTime.isAfter(flagTime);
         if(flag){
@@ -155,12 +174,23 @@ public class LocalDateUtils {
         }
     }
 
+    //GMT转本地时间
 
+    /**
+     *  DateTimeFormatter formatter = DateTimeFormatter
+     *                 .ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+     * @param instant 格林威治标准时间
+     * @return
+     */
+    public static LocalDateTime getLocalByGMT(String instant){
 
-
-
-
-
-
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        Instant localInstant = Instant.parse(instant);
+        //北京是东八区
+        String localDateTimeStr = LocalDateTime
+                .ofInstant(localInstant, ZoneOffset.of("+8"))
+                .format(formatter);
+        return LocalDateTime.parse(localDateTimeStr, formatter);
+    }
 
 }
