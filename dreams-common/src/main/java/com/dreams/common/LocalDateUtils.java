@@ -2,10 +2,6 @@ package com.dreams.common;
 
 import java.time.*;
 import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeFormatterBuilder;
-import java.time.format.FormatStyle;
-import java.util.Date;
-import java.util.Locale;
 
 /**
  * @author ming
@@ -32,59 +28,56 @@ public class LocalDateUtils {
     //get Date
 
     /**
-     *
-     * @param date 字符串日期, 传auto时默认是当前日期
+     * @param date   字符串日期, 传auto时默认是当前日期
      * @param format 日期格式
      * @return LocalDate
      */
-    public static LocalDate getDate(String date, String format){
-        if("auto".equals(date)) {
+    public static LocalDate getDate(String date, String format) {
+        if ("auto".equals(date)) {
             return LocalDate.now();
-        }else{
-            DateTimeFormatter formatter =  DateTimeFormatter.ofPattern(format);
+        } else {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern(format);
             return LocalDate.parse(date, formatter);
         }
     }
 
     /**
-     *
-     * @param time 字符串时间，传auto默认是当前时间
+     * @param time   字符串时间，传auto默认是当前时间
      * @param format 时间格式化
      * @return LocalTime
      */
-    public static LocalTime getTime(String time, String format){
-        if("auto".equals(time)) {
+    public static LocalTime getTime(String time, String format) {
+        if ("auto".equals(time)) {
             return LocalTime.now();
-        }else{
-            DateTimeFormatter formatter =  DateTimeFormatter.ofPattern(format);
+        } else {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern(format);
             return LocalTime.parse(time, formatter);
         }
     }
 
     //获得GMT时间
-    public static Instant getGMTInstant(){
+    public static Instant getGMTInstant() {
         return Instant.now();
     }
 
     //两个时间相差秒数
 
     /**
-     *
      * @param startDate 开始时间
      * @param endDate   结束时间
      * @param format    时间格式化
      * @param choose    选择返回秒数还是天数
-     * @return  相差秒数或天数，返回的不是绝对值
+     * @return 相差秒数或天数，返回的不是绝对值
      */
-    public static long getDateTimeDiff(String startDate, String endDate, String format, String choose){
+    public static long getDateTimeDiff(String startDate, String endDate, String format, String choose) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(format);
         LocalDateTime start = LocalDateTime.parse(startDate, formatter);
         LocalDateTime end = LocalDateTime.parse(endDate, formatter);
         if ("second".equals(choose)) {
             return Duration.between(start, end).getSeconds();
-        }else if("day".equals(choose)){
+        } else if ("day".equals(choose)) {
             return Period.between(start.toLocalDate(), end.toLocalDate()).getDays();
-        }else{
+        } else {
             return 0;
         }
     }
@@ -92,12 +85,11 @@ public class LocalDateUtils {
     //出生日期计算年龄
 
     /**
-     *
-     * @param birth 出生日期
+     * @param birth  出生日期
      * @param format 日期格式化
      * @return 年龄
      */
-    public static int getAgeFromBirth(String birth, String format){
+    public static int getAgeFromBirth(String birth, String format) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(format);
         LocalDate start = LocalDate.parse(birth, formatter);
         LocalDate end = LocalDate.now();
@@ -105,26 +97,23 @@ public class LocalDateUtils {
     }
 
 
-
     /**
-     *
      * @param dateTime 传入的时间
-     * @param format 时间格式化
+     * @param format   时间格式化
      * @return 时间戳（秒）
      * @description localDateTime转时间戳(秒)
      */
-    public static long getInstantFromDatetime(String dateTime, String format){
+    public static long getInstantFromDatetime(String dateTime, String format) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(format);
         return LocalDateTime.parse(dateTime, formatter).toEpochSecond(ZoneOffset.of("+8"));
     }
 
     /**
-     *
      * @param timestap 时间戳
      * @return localDateTime
      * @description 时间戳(秒) 转localDateTime
      */
-    public static LocalDateTime getDatetimeFromInstant(long timestap){
+    public static LocalDateTime getDatetimeFromInstant(long timestap) {
         Instant instant = Instant.ofEpochSecond(timestap);
         LocalDateTime dateTime = LocalDateTime.ofInstant(instant, ZoneOffset.systemDefault());
         return dateTime;
@@ -133,21 +122,20 @@ public class LocalDateUtils {
     //获取某日期前或后某一天的日期
 
     /**
-     *
-     * @param date 传入的日期
-     * @param days  天数
-     * @param isBefore  false为日期后，true为日期后
-     * @param format    日期格式化
-     * @return  间隔天数的日期
+     * @param date     传入的日期
+     * @param days     天数
+     * @param isBefore false为日期后，true为日期后
+     * @param format   日期格式化
+     * @return 间隔天数的日期
      */
-    public static LocalDate getDateBefore(String date, long days, boolean isBefore, String format){
+    public static LocalDate getDateBefore(String date, long days, boolean isBefore, String format) {
 
-        DateTimeFormatter formatter =  DateTimeFormatter.ofPattern(format);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(format);
         LocalDate localDate = LocalDate.parse(date, formatter);
         LocalDate result = LocalDate.now();
-        if(isBefore){
+        if (isBefore) {
             result = localDate.minusDays(days);
-        }else {
+        } else {
             result = localDate.plusDays(days);
         }
         return result;
@@ -156,20 +144,19 @@ public class LocalDateUtils {
     //判断是AM还是PM
 
     /**
-     *
-     * @param time 传入的时间
+     * @param time   传入的时间
      * @param format 时间格式化
      * @return 返回该时间是AM还是PM
      */
-    public static String getPeriodOfDay(String time, String format){
+    public static String getPeriodOfDay(String time, String format) {
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(format);
-        LocalTime flagTime = LocalTime.of(12,0,0);
+        LocalTime flagTime = LocalTime.of(12, 0, 0);
         LocalTime localTime = LocalTime.parse(time, formatter);
         boolean flag = localTime.isAfter(flagTime);
-        if(flag){
+        if (flag) {
             return "PM";
-        }else{
+        } else {
             return "AM";
         }
     }
@@ -177,12 +164,13 @@ public class LocalDateUtils {
     //GMT转本地时间
 
     /**
-     *  DateTimeFormatter formatter = DateTimeFormatter
-     *                 .ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+     * DateTimeFormatter formatter = DateTimeFormatter
+     * .ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+     *
      * @param instant 格林威治标准时间
      * @return
      */
-    public static LocalDateTime getLocalByGMT(String instant){
+    public static LocalDateTime getLocalByGMT(String instant) {
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         Instant localInstant = Instant.parse(instant);
