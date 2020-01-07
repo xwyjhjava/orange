@@ -34,7 +34,7 @@ object WordCount {
     println("============================")
     rdd.flatMap(x => List((x._1, x._2 + 1)))
       .foreach(println)
-
+    println("===========================")
   }
 
 }
