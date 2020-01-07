@@ -8,10 +8,12 @@
     <artifactId>dreams</artifactId>
     <version>1.0-SNAPSHOT</version>
     <modules>
-        <module>dreams-video</module>
-        <module>dreams-web</module>
         <module>dreams-common</module>
-        <module>dreamstest</module>
+        <module>dreams-kafka</module>
+        <module>dreams-hadoop</module>
+        <module>dreams-algorithm</module>
+        <module>dreams-designpattern</module>
+        <module>dreams-thread</module>
     </modules>
 
     <packaging>pom</packaging>
