@@ -20,6 +20,8 @@ object WordCount {
       .master("local[2]")
       .getOrCreate()
 
+    spark.read.csv("")
+
     val sc = spark.sparkContext
     sc.setLogLevel("ERROR")
 
