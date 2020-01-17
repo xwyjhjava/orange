@@ -9,6 +9,7 @@ import java.time.format.DateTimeFormatter;
  * @Package com.dreams.common
  * @date 2019/12/30 10:09
  * @descrition 约定：日期是年月日，时间是时分秒
+ *             这里使用的java.time包, 线程安全
  */
 public class LocalDateUtils {
 

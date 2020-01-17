@@ -2,13 +2,14 @@ package com.dreams.common;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 /**
  * 字符串工具类
  *
  *  本身apache的commons包里提供了一个String的工具类，
  *  作二次封装，方便使用
- *
+ *  这个字符工具类的使用场景是偏向web开发的
  *
  */
 public class StringUtils extends org.apache.commons.lang3.StringUtils
@@ -376,5 +377,61 @@ public class StringUtils extends org.apache.commons.lang3.StringUtils
         return sb.toString();
     }
 
+
+    /**
+     * 去除特殊字符
+     *
+     * @param raw    包含特殊字符的原始字符串
+     * @param regex  需要去除的特殊字符， 用一个空格替代特殊字符
+     * @return       返回字符串
+     */
+    public static String removeSpecialChar(String raw, String regex){
+        // \p表示unicode属性， 大P表示unicode字符集中的标点字符集
+        // 正则含义： 匹配除了标点字符集外的所有字符
+        String reg = ".*([^\\pP" + regex + "]+).*";
+        Pattern pattern = Pattern.compile(reg);
+        if(pattern.matcher(raw).matches()){
+            return raw.replaceAll("[\\pP" + regex + "]+", " ").trim();
+        }else{
+            return raw;
+        }
+    }
+
+    /**
+     * 判断是否为纯非法符号组成
+     *
+     * @param raw  输入的字符串
+     * @return boolean
+     */
+    public static boolean isIllegalChar(String raw){
+        String reg = ".*([^\\pP]+).*";
+        Pattern pattern = Pattern.compile(reg);
+        if(pattern.matcher(raw).matches()){
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * 判断是否包含中文字符
+     *
+     * @param raw  输入的字符串
+     * @return boolean
+     */
+    public static boolean isContainChinese(String raw){
+        String reg = ".*([\u4e00-\u9fa5])";
+        Pattern pattern = Pattern.compile(reg);
+        if(pattern.matcher(raw).matches()){
+            return true;
+        }
+        return false;
+    }
+
+
+
+    public static void main(String[] args) {
+        boolean result = isContainChinese("#@%aaas5656中国");
+        System.out.println(result);
+    }
 
 }
