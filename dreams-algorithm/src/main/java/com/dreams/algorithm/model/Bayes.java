@@ -9,4 +9,8 @@ package com.dreams.algorithm.model;
  */
 public class Bayes {
 
+    public static void main(String[] args) {
+
+    }
+
 }

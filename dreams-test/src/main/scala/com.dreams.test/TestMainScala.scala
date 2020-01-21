@@ -19,7 +19,8 @@ object TestMainScala {
 
   def main(args: Array[String]): Unit = {
 //    run01()
-      testReadFile()
+//      testReadFile()
+    saveCsvFile()
   }
 
   def run01(): Unit ={
@@ -66,5 +67,25 @@ object TestMainScala {
     list.take(2).foreach(println)
   }
 
+
+  def saveCsvFile(): Unit ={
+
+    val spark = SparkSession.builder()
+      .appName("save file")
+      .master("local[*]")
+      .getOrCreate()
+
+    val dataDF = spark.createDataFrame(Array(("1","2020-01-19 16:10:20", "1", "你好，请问这款理财产品的售后怎么处理？", "1", "微信")))
+        .toDF("ID","create_date","period_type", "question", "cluster_id", "platform")
+    dataDF.show()
+
+    dataDF
+      .coalesce(1)
+      .write
+      .mode("overwrite")
+      .option("header", true)
+      .csv("D:\\xiaoi\\lp")
+
+  }
 
 }
