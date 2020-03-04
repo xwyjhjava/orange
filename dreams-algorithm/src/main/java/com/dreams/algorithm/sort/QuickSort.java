@@ -40,7 +40,21 @@ public class QuickSort extends AbstractSort{
     public void sort() {
 
         //jdk内部实现是Dual-Pivot Quicksort
-        Arrays.sort(array);
+//        Arrays.sort(array);
+
+        int left = 0;
+        int right = array.length - 1;
+        int length = array.length;
+
+        for (int i = 0; i < length; i++) {
+            int ai = array[i];
+
+
+        }
+
+
+
+
 
     }
 
