@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>首页</title>
+    <link rel="stylesheet" href="frame/layui/css/layui.css">
+</head>
+<body>
+    <div class="layui-container">
+        <!--header-->
+        <div id="header" style="height: 100px;">
+            <ul class="layui-nav">
+                <li class="layui-nav-item">
+                    <a href="">控制台<span class="layui-badge">9</span></a>
+                </li>
+                <li class="layui-nav-item">
+                    <a href="">个人中心<span class="layui-badge-dot"></span></a>
+                </li>
+                <li class="layui-nav-item" lay-unselect="">
+                    <a href="javascript:;"><img src="//t.cn/RCzsdCq" class="layui-nav-img">我</a>
+                    <dl class="layui-nav-child">
+                        <dd><a href="javascript:;">修改信息</a></dd>
+                        <dd><a href="javascript:;">安全管理</a></dd>
+                        <dd><a href="javascript:;">退了</a></dd>
+                    </dl>
+                </li>
+            </ul>
+        </div>
+        <!--body-->
+        <div id="main">
+            <div id="create">
+                <form class="layui-form">
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">任务名称</label>
+                        <div class="layui-input-block">
+                            <input type="text" name="title" lay-verify="title" autocomplete="off" placeholder="请输入任务名称" class="layui-input">
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">任务时间段</label>
+                        <div class="layui-input-inline">
+                            <input type="text" class="layui-input" id="period_start" placeholder="yyyy-MM-dd">
+                        </div>
+
+                        <div class="layui-form-mid">-</div>
+
+                        <div class="layui-input-inline">
+                            <input type="text" class="layui-input" id="period_end" placeholder="yyyy-MM-dd">
+                        </div>
+                    </div>
+
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">任务性质</label>
+                        <div class="layui-input-inline">
+                            <select name="nature">
+                                <option value="工作">工作</option>
+                                <option value="学习">学习</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">任务内容</label>
+                        <div class="layui-input-block">
+                            <textarea placeholder="请输入任务内容" class="layui-textarea"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">笔记链接</label>
+                        <div class="layui-input-block">
+                            <input type="text" name="title" lay-verify="title" autocomplete="off" placeholder="笔记链接" class="layui-input">
+                        </div>
+                    </div>
+
+                </form>
+
+
+            </div>
+        </div>
+
+
+    </div>
+
+<script th:src="@{/frame/layui/layui.js}" charset="UTF-8"></script>
+<script>
+    layui.use(['layui', 'form', 'laydate'], function () {
+        var layer = layui.layer,
+            form = layui.form,
+            laydate = layui.laydate;
+
+        laydate.render({
+            elem: '#period_start'
+        });
+
+        laydate.render({
+            elem: '#period_end'
+        });
+
+
+    })
+</script>
+</body>
+</html>
