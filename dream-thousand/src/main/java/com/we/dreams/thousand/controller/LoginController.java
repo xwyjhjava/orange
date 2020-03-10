@@ -1,6 +1,8 @@
 package com.we.dreams.thousand.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.we.dreams.thousand.dto.LoginDto;
+import com.we.dreams.thousand.dto.ResultDto;
 import com.we.dreams.thousand.model.TbUser;
 import org.apache.ibatis.annotations.Param;
 import org.slf4j.Logger;
@@ -8,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
@@ -24,10 +27,15 @@ public class LoginController {
 
     @PostMapping("/login")
     @ResponseBody
-    public String login(@Param("username") String username, @Param("password") String password){
+    public ResultDto login(@RequestBody LoginDto paramLogin){
 
-        LOG.info("input username : {}", username );
-        LOG.info("input password : {}", password);
+        ResultDto resultDto = new ResultDto();
+
+        LOG.info("input username : {}", paramLogin.getUsername());
+        LOG.info("input password : {}", paramLogin.getPassword());
+
+        String username = paramLogin.getUsername();
+        String password = paramLogin.getPassword();
 
         TbUser user = new TbUser();
         //省略MD5
@@ -38,13 +46,21 @@ public class LoginController {
         if(tbUser != null){
             LOG.info("db username => {}", tbUser.getUserName());
             LOG.info("db password => {}", tbUser.getPassword());
-            return "login success";
+            resultDto.setModule(tbUser);
+            resultDto.setSuccess(true);
         }
-        return "login failed";
+        return resultDto;
+    }
+
+    @GetMapping("/login")
+    public String toLogin(){
+        return "login";
     }
 
     @GetMapping("/index")
     public String toIndex(){
         return "index";
     }
+
+
 }

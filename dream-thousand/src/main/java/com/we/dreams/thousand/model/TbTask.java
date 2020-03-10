@@ -35,17 +35,19 @@ public class TbTask extends Model<TbTask> implements Serializable {
 
     private String taskName;
 
-    private LocalDate taskDate;
+    private LocalDateTime taskStartTime;
 
-    private String taskPeriod;
+    private LocalDateTime taskEndTime;
 
-    private Float taskDuration;
+    private String taskDuration;
 
     private String taskNature;
 
     private String taskContent;
 
     private String notehref;
+
+    private String taskStatus;
 
     private LocalDateTime createTime;
 
@@ -81,27 +83,27 @@ public class TbTask extends Model<TbTask> implements Serializable {
         this.taskName = taskName;
     }
 
-    public LocalDate getTaskDate() {
-        return taskDate;
+    public LocalDateTime getTaskStartTime() {
+        return taskStartTime;
     }
 
-    public void setTaskDate(LocalDate taskDate) {
-        this.taskDate = taskDate;
+    public void setTaskStartTime(LocalDateTime taskStartTime) {
+        this.taskStartTime = taskStartTime;
     }
 
-    public String getTaskPeriod() {
-        return taskPeriod;
+    public LocalDateTime getTaskEndTime() {
+        return taskEndTime;
     }
 
-    public void setTaskPeriod(String taskPeriod) {
-        this.taskPeriod = taskPeriod;
+    public void setTaskEndTime(LocalDateTime taskEndTime) {
+        this.taskEndTime = taskEndTime;
     }
 
-    public Float getTaskDuration() {
+    public String getTaskDuration() {
         return taskDuration;
     }
 
-    public void setTaskDuration(Float taskDuration) {
+    public void setTaskDuration(String taskDuration) {
         this.taskDuration = taskDuration;
     }
 
@@ -127,6 +129,14 @@ public class TbTask extends Model<TbTask> implements Serializable {
 
     public void setNotehref(String notehref) {
         this.notehref = notehref;
+    }
+
+    public String getTaskStatus() {
+        return taskStatus;
+    }
+
+    public void setTaskStatus(String taskStatus) {
+        this.taskStatus = taskStatus;
     }
 
     public LocalDateTime getCreateTime() {

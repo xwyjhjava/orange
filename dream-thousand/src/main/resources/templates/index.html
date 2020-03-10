@@ -10,96 +10,213 @@
     <div class="layui-container">
         <!--header-->
         <div id="header" style="height: 100px;">
-            <ul class="layui-nav">
-                <li class="layui-nav-item">
-                    <a href="">控制台<span class="layui-badge">9</span></a>
-                </li>
+            <ul class="layui-nav layui-bg-orange">
+
                 <li class="layui-nav-item">
                     <a href="">个人中心<span class="layui-badge-dot"></span></a>
                 </li>
                 <li class="layui-nav-item" lay-unselect="">
-                    <a href="javascript:;"><img src="//t.cn/RCzsdCq" class="layui-nav-img">我</a>
+                    <a href="javascript:;"><img src="" class="layui-nav-img">我</a>
                     <dl class="layui-nav-child">
                         <dd><a href="javascript:;">修改信息</a></dd>
-                        <dd><a href="javascript:;">安全管理</a></dd>
-                        <dd><a href="javascript:;">退了</a></dd>
+                        <dd><a href="javascript:;">注销</a></dd>
                     </dl>
                 </li>
             </ul>
         </div>
-        <!--body-->
-        <div id="main">
-            <div id="create">
-                <form class="layui-form">
-                    <div class="layui-form-item">
-                        <label class="layui-form-label">任务名称</label>
-                        <div class="layui-input-block">
-                            <input type="text" name="title" lay-verify="title" autocomplete="off" placeholder="请输入任务名称" class="layui-input">
+
+        <!--tab-->
+        <div class="layui-tab" lay-filter="main_tab">
+            <ul class="layui-tab-title">
+                <li class="layui-this" lay-id="one">任务创建</li>
+                <li lay-id="two">查看任务列表</li>
+            </ul>
+            <div class="layui-tab-content">
+                <!--任务创建选项卡-->
+                <div class="layui-tab-item layui-show">
+
+                    <form class="layui-form" lay-filter="task_form" style="width: 65%">
+
+                        <div class="layui-form-item">
+                            <div class="layui-input-block layui-hide">
+                                <input type="text" name="user_id" class="layui-input">
+                            </div>
                         </div>
-                    </div>
-                    <div class="layui-form-item">
-                        <label class="layui-form-label">任务时间段</label>
-                        <div class="layui-input-inline">
-                            <input type="text" class="layui-input" id="period_start" placeholder="yyyy-MM-dd">
+
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">任务名称</label>
+                            <div class="layui-input-block">
+                                <input type="text" name="task_name" lay-verify="required" autocomplete="off" placeholder="请输入任务名称" class="layui-input">
+                            </div>
+                        </div>
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">任务时间段</label>
+                            <div class="layui-input-inline">
+                                <input name="period_start" lay-verify="required" type="text" class="layui-input" id="period_start" placeholder="yyyy-MM-dd HH:mm:ss">
+                            </div>
+
+                            <div class="layui-form-mid">-</div>
+
+                            <div class="layui-input-inline">
+                                <input name="period_end" lay-verify="required" type="text" class="layui-input" id="period_end" placeholder="yyyy-MM-dd HH:mm:ss">
+                            </div>
                         </div>
 
-                        <div class="layui-form-mid">-</div>
-
-                        <div class="layui-input-inline">
-                            <input type="text" class="layui-input" id="period_end" placeholder="yyyy-MM-dd">
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">任务性质</label>
+                            <div class="layui-input-inline">
+                                <select name="task_nature">
+                                    <option value="工作">工作</option>
+                                    <option value="学习">学习</option>
+                                </select>
+                            </div>
                         </div>
-                    </div>
 
-                    <div class="layui-form-item">
-                        <label class="layui-form-label">任务性质</label>
-                        <div class="layui-input-inline">
-                            <select name="nature">
-                                <option value="工作">工作</option>
-                                <option value="学习">学习</option>
-                            </select>
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">任务内容</label>
+                            <div class="layui-input-block">
+                                <textarea name="task_content" lay-verify="required" placeholder="请输入任务内容" class="layui-textarea"></textarea>
+                            </div>
                         </div>
-                    </div>
 
-                    <div class="layui-form-item">
-                        <label class="layui-form-label">任务内容</label>
-                        <div class="layui-input-block">
-                            <textarea placeholder="请输入任务内容" class="layui-textarea"></textarea>
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">笔记链接</label>
+                            <div class="layui-input-block">
+                                <input type="text" name="task_href" lay-verify="url" autocomplete="off" placeholder="笔记链接" class="layui-input">
+                            </div>
                         </div>
-                    </div>
 
-                    <div class="layui-form-item">
-                        <label class="layui-form-label">笔记链接</label>
-                        <div class="layui-input-block">
-                            <input type="text" name="title" lay-verify="title" autocomplete="off" placeholder="笔记链接" class="layui-input">
+                        <div class="layui-form-item">
+                            <div class="layui-input-block">
+                                <button class="layui-btn" lay-submit lay-filter="add_task">立即提交</button>
+                                <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+
+                                <button id="setValue" class="layui-btn layui-bg-orange">赋值</button>
+                            </div>
                         </div>
-                    </div>
 
-                </form>
-
-
+                    </form>
+                </div>
+                <!--查看任务列表选项卡-->
+                <div class="layui-tab-item">
+                    <table class="layui-table">
+                        <colgroup>
+                            <col width="150">
+                            <col width="200">
+                            <col>
+                        </colgroup>
+                        <thead>
+                        <tr>
+                            <th>昵称</th>
+                            <th>加入时间</th>
+                            <th>签名</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td>贤心</td>
+                            <td>2016-11-29</td>
+                            <td>人生就像是一场修行</td>
+                        </tr>
+                        <tr>
+                            <td>许闲心</td>
+                            <td>2016-11-28</td>
+                            <td>于千万人之中遇见你所遇见的人，于千万年之中，时间的无涯的荒野里…</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
 
+        <!--body-->
+        <div id="main">
+
+        </div>
 
     </div>
 
 <script th:src="@{/frame/layui/layui.js}" charset="UTF-8"></script>
 <script>
-    layui.use(['layui', 'form', 'laydate'], function () {
+
+    layui.use(['layer', 'form', 'laydate', 'jquery', 'element', 'table'], function () {
         var layer = layui.layer,
             form = layui.form,
-            laydate = layui.laydate;
+            laydate = layui.laydate,
+            $ = layui.jquery,
+            element = layui.element;
 
+        // 时间控件
         laydate.render({
-            elem: '#period_start'
+            elem: '#period_start',
+            type: 'datetime'
+        });
+        laydate.render({
+            elem: '#period_end',
+            type: 'datetime'
         });
 
-        laydate.render({
-            elem: '#period_end'
+        form.val("task_form", {"user_id" : localStorage.getItem("userId")});
+
+        // 提交任务的监听
+        form.on('submit(add_task)', function (data) {
+            $.ajax({
+                type: "post",
+                url: "create/task",
+                contentType: 'application/json;charset=UTF-8',
+                data: JSON.stringify(data.field),
+                dataType: "json",
+                success: function (returnData) {
+                    console.log(returnData)
+                    if(returnData.success == true){
+                        layer.msg("任务记录成功");
+                        //重置表单
+                        form.reset();
+                        form.render();
+                    }
+                }
+            });
+            return false;
+        });
+
+        // todo 赋值 (无效，待解决， 会自动刷新界面)
+        $("#setValue").click(function () {
+            // form.val("task_form", {
+            //     "user_id" : "2020",
+            //     "task_name" : "工作测试",
+            //     "period_start" : "2020-03-10 18:10:10",
+            //     "period_end" : "2020-03-10 18:12:23",
+            //     "task_nature" : "工作",
+            //     "task_content" : "测试测试测试",
+            //     "task_href" : "https://www.baidu.com"
+            // });
+            // form.render();
         });
 
 
-    })
+        // todo 表格的渲染
+        element.on('tab(main_tab)', function (data) {
+            console.log(data.index)
+            if(data.index == 1){
+
+                $.ajax({
+                    type : "get",
+                    url : "list",
+                    contentType: 'application/json;charset=UTF-8',
+                    dataType: "json",
+                    success: function (returnData) {
+                        if(returnData.success == true){
+
+                        }
+                    }
+                });
+
+            }
+        });
+
+
+
+    });
 </script>
 </body>
 </html>

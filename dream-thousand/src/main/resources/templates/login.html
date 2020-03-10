@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>登录页</title>
+    <link rel="stylesheet" th:href="@{frame/layui/css/layui.css}">
+</head>
+<body>
+
+<div class="layui-container">
+    <div id="login_main" style="margin-top: 30%; margin-left: 20%">
+        <form class="layui-form layui-form-pane">
+            <div class="layui-form-item">
+                <label class="layui-form-label">用户名</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="username" autocomplete="off" placeholder="请输入用户" class="layui-input" lay-verify="required">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">密码</label>
+                <div class="layui-input-inline">
+                    <input type="password" name="password" placeholder="请输入密码" autocomplete="off" class="layui-input" lay-verify="required">
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <div class="layui-input-block">
+                    <button type="button" lay-submit lay-filter="login" class="layui-btn layui-btn-normal layui-btn-radius">登录</button>
+                </div>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+<script src="frame/layui/layui.js" charset="UTF-8"></script>
+<script>
+
+    layui.use(['layer', 'form', 'jquery'], function () {
+        var layer = layui.layer,
+            form = layui.form,
+            $ = layui.jquery;
+        // 登录监听
+
+        form.on('submit(login)', function (data) {
+            $.ajax({
+                type: "post",
+                url: "login",
+                contentType: 'application/json;charset=UTF-8',
+                data: JSON.stringify(data.field),
+                dataType: "json",
+                success: function (returnData) {
+                    console.log("success", returnData);
+                    if(returnData.success == true){
+                        layer.alert("登录成功");
+                        localStorage.setItem("userId", returnData.module.userId)
+                        window.location.href = "index";
+                    }
+                }
+            });
+            return true;
+        });
+    });
+
+</script>
+</body>
+</html>

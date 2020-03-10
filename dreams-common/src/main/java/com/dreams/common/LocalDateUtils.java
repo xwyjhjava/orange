@@ -56,6 +56,22 @@ public class LocalDateUtils {
         }
     }
 
+    /**
+     *
+     * @param datetime 输入字符串时间， 传aotu默认是当前时间
+     * @param format   格式化形式
+     * @return  LocalDateTime
+     */
+    public static LocalDateTime getDateTime(String datetime, String format){
+        if("auto".equals(datetime)){
+            return LocalDateTime.now();
+        }else{
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern(format);
+            return LocalDateTime.parse(datetime, formatter);
+        }
+    }
+
+
     //获得GMT时间
     public static Instant getGMTInstant() {
         return Instant.now();
