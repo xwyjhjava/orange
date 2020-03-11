@@ -63,6 +63,7 @@ public class TaskController {
         return resultDto;
     }
 
+//    todo 分页查询
     @GetMapping("/list")
     @ResponseBody
     public ResultDto getTaskList(){
@@ -77,6 +78,8 @@ public class TaskController {
         if(taskList.size() > 0){
             resultDto.setSuccess(true);
             resultDto.setModule(taskList);
+            resultDto.setCode("0");
+            resultDto.setCount(taskList.size());
         }
         return resultDto;
     }

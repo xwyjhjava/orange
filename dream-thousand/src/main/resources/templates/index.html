@@ -1,6 +1,6 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
 <html lang="en">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <title>首页</title>
@@ -28,12 +28,12 @@
         <!--tab-->
         <div class="layui-tab" lay-filter="main_tab">
             <ul class="layui-tab-title">
-                <li class="layui-this" lay-id="one">任务创建</li>
-                <li lay-id="two">查看任务列表</li>
+                <li lay-id="one">任务创建</li>
+                <li  class="layui-this" lay-id="two">查看任务列表</li>
             </ul>
             <div class="layui-tab-content">
                 <!--任务创建选项卡-->
-                <div class="layui-tab-item layui-show">
+                <div class="layui-tab-item">
 
                     <form class="layui-form" lay-filter="task_form" style="width: 65%">
 
@@ -96,10 +96,12 @@
                         </div>
 
                     </form>
+
                 </div>
                 <!--查看任务列表选项卡-->
-                <div class="layui-tab-item">
-                    <table class="layui-table">
+                <div class="layui-tab-item layui-show">
+
+                    <table id="task_list_demo" class="layui-table">
                         <colgroup>
                             <col width="150">
                             <col width="200">
@@ -125,6 +127,9 @@
                         </tr>
                         </tbody>
                     </table>
+
+                    <table id="task_list" class="layui-hide"></table>
+
                 </div>
             </div>
         </div>
@@ -136,15 +141,16 @@
 
     </div>
 
-<script th:src="@{/frame/layui/layui.js}" charset="UTF-8"></script>
-<script>
+<script src="frame/layui/layui.js" charset="UTF-8"></script>
+<script th:inline="none">
 
     layui.use(['layer', 'form', 'laydate', 'jquery', 'element', 'table'], function () {
         var layer = layui.layer,
             form = layui.form,
             laydate = layui.laydate,
             $ = layui.jquery,
-            element = layui.element;
+            element = layui.element,
+            table = layui.table;
 
         // 时间控件
         laydate.render({
@@ -172,47 +178,41 @@
                         layer.msg("任务记录成功");
                         //重置表单
                         form.reset();
-                        form.render();
+                        layer.msg("重置完成")
                     }
                 }
             });
             return false;
         });
 
-        // todo 赋值 (无效，待解决， 会自动刷新界面)
-        $("#setValue").click(function () {
-            // form.val("task_form", {
-            //     "user_id" : "2020",
-            //     "task_name" : "工作测试",
-            //     "period_start" : "2020-03-10 18:10:10",
-            //     "period_end" : "2020-03-10 18:12:23",
-            //     "task_nature" : "工作",
-            //     "task_content" : "测试测试测试",
-            //     "task_href" : "https://www.baidu.com"
-            // });
-            // form.render();
-        });
 
-
-        // todo 表格的渲染
-        element.on('tab(main_tab)', function (data) {
-            console.log(data.index)
-            if(data.index == 1){
-
-                $.ajax({
-                    type : "get",
-                    url : "list",
-                    contentType: 'application/json;charset=UTF-8',
-                    dataType: "json",
-                    success: function (returnData) {
-                        if(returnData.success == true){
-
-                        }
-                    }
-                });
-
+        // todo 加入用户姓名字段
+        table.render({
+            elem: "#task_list",
+            url: 'list',
+            method: 'GET',
+            cellMinWidth: 80,
+            response:{
+                dataName: 'module'
+            },
+            cols:[[
+                {field: 'id', title: 'ID'},
+                {field: 'userId', title: "用户ID"},
+                {field: 'taskName', title: '任务名称'},
+                {field: 'taskDuration', title: '任务时长(h)'},
+                {field: 'taskNature', title: '任务性质'},
+                {field: 'notehref', title: '笔记链接'},
+                {field: 'taskStatus', title: '任务状态'}
+            ]],
+            skin: 'line',
+            even: true,
+            page: true,
+            limit: 5,
+            done: function (res, curr, count) {
+                console.log("table render done")
             }
         });
+
 
 
 

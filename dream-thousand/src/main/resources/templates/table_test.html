@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>table test</title>
+    <link rel="stylesheet" href="frame/layui/css/layui.css">
+</head>
+<body>
+    <table id="table_test"></table>
+
+<script src="frame/layui/layui.js" charset="UTF-8"></script>
+<script th:inline="none">
+
+    layui.use('table', function () {
+        var table = layui.table;
+        table.render({
+            elem: '#table_test',
+            cellMinWidth: 80,
+            url: 'list',
+            method: 'GET',
+            response: {
+                dataName: 'module'
+            },
+            cols:[[
+                {field: 'id', title: 'ID'},
+                {field: 'taskName', title: "任务名称"}
+            ]],
+            done: function (res, curr, count) {
+                console.log("table 渲染结束")
+            }
+        });
+    })
+
+</script>
+</body>
+</html>

@@ -16,6 +16,10 @@ public class ResultDto<T> implements Serializable {
     private boolean success;
     private T module;
 
+    //适应前端表格所做的补充字段
+    private String code;
+    private Integer count;
+
     public String getErrorMsg() {
         return errorMsg;
     }
@@ -46,5 +50,21 @@ public class ResultDto<T> implements Serializable {
 
     public void setModule(T module) {
         this.module = module;
+    }
+
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
+    }
+
+    public Integer getCount() {
+        return count;
+    }
+
+    public void setCount(Integer count) {
+        this.count = count;
     }
 }
