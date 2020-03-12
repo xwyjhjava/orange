@@ -192,6 +192,10 @@
             url: 'list',
             method: 'GET',
             cellMinWidth: 80,
+            request:{
+                pageName: 'pageNum',
+                limitName: 'pageSize'
+            },
             response:{
                 dataName: 'module'
             },
@@ -208,6 +212,7 @@
             even: true,
             page: true,
             limit: 5,
+            limits: [5,10],
             done: function (res, curr, count) {
                 console.log("table render done")
             }

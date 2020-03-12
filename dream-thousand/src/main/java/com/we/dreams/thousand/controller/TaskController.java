@@ -1,5 +1,7 @@
 package com.we.dreams.thousand.controller;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.dreams.common.LocalDateUtils;
 import com.we.dreams.thousand.dto.ResultDto;
 import com.we.dreams.thousand.dto.TaskDto;
@@ -9,10 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -63,23 +62,24 @@ public class TaskController {
         return resultDto;
     }
 
-//    todo 分页查询
     @GetMapping("/list")
     @ResponseBody
-    public ResultDto getTaskList(){
+    public ResultDto getTaskList(@RequestParam("pageNum") Integer pageNum, @RequestParam("pageSize") Integer pageSize){
 
         ResultDto resultDto = new ResultDto();
 
         TbTask task = new TbTask();
-        List<TbTask> taskList = task.selectAll();
+        Page<TbTask> page = new Page<>(pageNum, pageSize);
+        IPage<TbTask> taskList = task.selectPage(page, null);
 
-        LOG.info("list size {}", taskList.size());
+        long size = taskList.getSize();
+        LOG.info("list size {}", size);
 
-        if(taskList.size() > 0){
+        if(size > 0){
             resultDto.setSuccess(true);
-            resultDto.setModule(taskList);
-            resultDto.setCode("0");
-            resultDto.setCount(taskList.size());
+            resultDto.setModule(taskList.getRecords());
+            resultDto.setCode(0);
+            resultDto.setCount(taskList.getTotal());
         }
         return resultDto;
     }

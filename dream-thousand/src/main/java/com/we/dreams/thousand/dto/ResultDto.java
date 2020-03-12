@@ -17,8 +17,8 @@ public class ResultDto<T> implements Serializable {
     private T module;
 
     //适应前端表格所做的补充字段
-    private String code;
-    private Integer count;
+    private long code;
+    private long count;
 
     public String getErrorMsg() {
         return errorMsg;
@@ -52,19 +52,19 @@ public class ResultDto<T> implements Serializable {
         this.module = module;
     }
 
-    public String getCode() {
+    public long getCode() {
         return code;
     }
 
-    public void setCode(String code) {
+    public void setCode(long code) {
         this.code = code;
     }
 
-    public Integer getCount() {
+    public long getCount() {
         return count;
     }
 
-    public void setCount(Integer count) {
+    public void setCount(long count) {
         this.count = count;
     }
 }
