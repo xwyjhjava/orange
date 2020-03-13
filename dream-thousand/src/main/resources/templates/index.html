@@ -82,14 +82,14 @@
                         <div class="layui-form-item">
                             <label class="layui-form-label">笔记链接</label>
                             <div class="layui-input-block">
-                                <input type="text" name="task_href" lay-verify="url" autocomplete="off" placeholder="笔记链接" class="layui-input">
+                                <input type="text" name="task_href" autocomplete="off" placeholder="笔记链接" class="layui-input">
                             </div>
                         </div>
 
                         <div class="layui-form-item">
                             <div class="layui-input-block">
                                 <button class="layui-btn" lay-submit lay-filter="add_task">立即提交</button>
-                                <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+                                <button id="btn-reset" type="reset" class="layui-btn layui-btn-primary">重置</button>
 
                                 <button id="setValue" class="layui-btn layui-bg-orange">赋值</button>
                             </div>
@@ -162,6 +162,7 @@
             type: 'datetime'
         });
 
+        // 可以优化， 不由前台传到后台
         form.val("task_form", {"user_id" : localStorage.getItem("userId")});
 
         // 提交任务的监听
@@ -177,7 +178,8 @@
                     if(returnData.success == true){
                         layer.msg("任务记录成功");
                         //重置表单
-                        form.reset();
+                        // form.reset();
+                        $("#btn-reset").click();
                         layer.msg("重置完成")
                     }
                 }
@@ -200,13 +202,16 @@
                 dataName: 'module'
             },
             cols:[[
-                {field: 'id', title: 'ID'},
+                {field: 'id', title: 'ID', sort: true},
                 {field: 'userId', title: "用户ID"},
                 {field: 'taskName', title: '任务名称'},
+                {field: 'taskStartTime', title: '开始时间', sort: true},
+                {field: 'taskEndTime', title: '结束时间'},
                 {field: 'taskDuration', title: '任务时长(h)'},
                 {field: 'taskNature', title: '任务性质'},
-                {field: 'notehref', title: '笔记链接'},
-                {field: 'taskStatus', title: '任务状态'}
+                {field: 'taskContent', title: '任务内容'},
+                {field: 'notehref', title: '笔记链接'}
+
             ]],
             skin: 'line',
             even: true,

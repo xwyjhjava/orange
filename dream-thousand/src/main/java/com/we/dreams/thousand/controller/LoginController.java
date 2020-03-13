@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import javax.servlet.http.HttpServletRequest;
+
 /**
  * @author ming
  * @version V1.0
@@ -27,7 +29,7 @@ public class LoginController {
 
     @PostMapping("/login")
     @ResponseBody
-    public ResultDto login(@RequestBody LoginDto paramLogin){
+    public ResultDto login(@RequestBody LoginDto paramLogin, HttpServletRequest request){
 
         ResultDto resultDto = new ResultDto();
 
@@ -46,6 +48,10 @@ public class LoginController {
         if(tbUser != null){
             LOG.info("db username => {}", tbUser.getUserName());
             LOG.info("db password => {}", tbUser.getPassword());
+            //用户信息保存到session
+//            todo userInfo可删
+            request.getSession().setAttribute("userInfo", tbUser.getUserName());
+            request.getSession().setAttribute("userId", tbUser.getUserId());
             resultDto.setModule(tbUser);
             resultDto.setSuccess(true);
         }

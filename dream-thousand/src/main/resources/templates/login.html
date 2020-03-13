@@ -53,7 +53,7 @@
                 success: function (returnData) {
                     console.log("success", returnData);
                     if(returnData.success == true){
-                        layer.alert("登录成功");
+                        layer.alert("登录成功", setTimeout(3000));
                         localStorage.setItem("userId", returnData.module.userId)
                         window.location.href = "index";
                     }

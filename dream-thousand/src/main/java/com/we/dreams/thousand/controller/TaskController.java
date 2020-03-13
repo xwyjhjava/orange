@@ -5,16 +5,14 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.dreams.common.LocalDateUtils;
 import com.we.dreams.thousand.dto.ResultDto;
 import com.we.dreams.thousand.dto.TaskDto;
-import com.we.dreams.thousand.mapper.TbTaskMapper;
 import com.we.dreams.thousand.model.TbTask;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.UUID;
 
 /**
@@ -31,13 +29,17 @@ public class TaskController {
 
     @PostMapping("/create/task")
     @ResponseBody
-    public ResultDto create(@RequestBody TaskDto paramTask){
+    public ResultDto create(@RequestBody TaskDto paramTask, HttpServletRequest request){
 
         ResultDto resultDto = new ResultDto();
 
         TbTask task = new TbTask();
         task.setTaskId(UUID.randomUUID().toString().trim().replaceAll("-", ""));
-        task.setUserId(paramTask.getUser_id());
+
+        // 从Session中取用户ID
+        String userId = request.getSession().getAttribute("userId").toString();
+        task.setUserId(userId);
+
         // 计算两个时间的时长
         long second = LocalDateUtils.getDateTimeDiff(paramTask.getPeriod_start(), paramTask.getPeriod_end(),
                 "yyyy-MM-dd HH:mm:ss", "second");
@@ -51,7 +53,7 @@ public class TaskController {
         task.setTaskStartTime(LocalDateUtils.getDateTime(paramTask.getPeriod_start(), "yyyy-MM-dd HH:mm:ss"));
         task.setTaskEndTime(LocalDateUtils.getDateTime(paramTask.getPeriod_end(), "yyyy-MM-dd HH:mm:ss"));
 
-        task.setTaskStatus("进行中");
+        task.setTaskStatus("完成");
         task.setCreateTime(LocalDateTime.now());
 
         boolean insert = task.insert();
