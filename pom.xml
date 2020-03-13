@@ -15,6 +15,7 @@
         <module>dreams-designpattern</module>
         <module>dreams-thread</module>
         <module>dreams-test</module>
+        <module>dreams-recommend</module>
     </modules>
 
     <packaging>pom</packaging>
