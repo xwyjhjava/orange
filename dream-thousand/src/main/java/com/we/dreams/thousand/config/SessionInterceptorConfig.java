@@ -32,6 +32,9 @@ public class SessionInterceptorConfig implements WebMvcConfigurer {
                 //由于favicon.ico请求会出现找不到图标是404，引发Spring自身的error请求，需要排除error请求
                 .excludePathPatterns("/error")
 
+                //放行静态资源
+                .excludePathPatterns("/frame/**")
+
                 //添加拦截path
                 .addPathPatterns("/**");
     }
