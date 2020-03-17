@@ -1,6 +1,6 @@
 package com.xiaoi.feature
 
-import org.apache.spark.sql.{DataFrame, Dataset, Row, SparkSession}
+import org.apache.spark.sql.{DataFrame, Dataset, RelationalGroupedDataset, Row, SparkSession}
 import org.slf4j.LoggerFactory
 import org.apache.log4j.{Level, Logger}
 import org.apache.spark.sql.functions._
@@ -20,6 +20,7 @@ class ITotal(private val spark: SparkSession) extends Serializable {
    *
    * @param df  data_clean数据
    * @return  (item, 交易回合数,  交易回合数ratio)
+   * @description
    */
   def get_i_total_orders(df: Dataset[Row]): Dataset[Row] ={
 
@@ -36,7 +37,7 @@ class ITotal(private val spark: SparkSession) extends Serializable {
         count("uid").as("i_total_orders"),
         (count("uid").cast(DataTypes.FloatType) / total_uid).as("i_total_orders_ratio")
       )
-    dataFrame
+    dataFrame.orderBy(desc("i_total_orders"))
   }
 
 
@@ -57,7 +58,7 @@ class ITotal(private val spark: SparkSession) extends Serializable {
         count("pluname").as("i_total_item"),
         (count("pluname") / total_item).as("i_total_items_ratio")
       )
-    dataFrame
+    dataFrame.orderBy(desc("i_total_item"))
   }
 
 
@@ -66,28 +67,49 @@ class ITotal(private val spark: SparkSession) extends Serializable {
   /**
    *
    * @param df  data clean 数据
-   * @return    （）
+   * @return    （itemId,  商品独立卖出次数， 商品独立卖出次数占比）
+   * @description  每个交易回合只有一个商品
    */
   def get_i_total_distinct_users(df: Dataset[Row]): Dataset[Row] ={
 
-
-    df.select("vipno", "prodno")
-      .groupBy("prodno")
+    val base_df: DataFrame = df.select("uid", "prodno")
+      .groupBy("uid")
       .agg(
-        count("vipno")
+        count("prodno").as("i_count")
       )
-
-    val dataFrame: Dataset[Row] = df.select("prodno", "vipno")
-      .groupBy("prodno")
-      .agg(
-        count("vipno").as("i_count")
-      )
+    //删选出每张订单只有一个商品的记录
       .filter($"i_count" === 1)
-    dataFrame
 
+    //总独立商品购买次数
+    val i_total_only_count: Long = base_df.count()
+
+    val i_only_frame: Dataset[Row] = base_df.join(df.select("uid", "prodno"), "uid")
+      .select("prodno", "i_count")
+      .groupBy("prodno")
+      .agg(
+        //每个item被单独购买的次数
+        sum("i_count").as("i_total_distinct_users"),
+        //每个item独立购买次数 /  总独立商品购买次数
+        (sum("i_count") / i_total_only_count).as("i_total_distinct_users_ratio")
+      )
+    i_only_frame.orderBy(desc("i_total_distinct_users"))
   }
 
 
+  // TODO: 含有本商品的交易回合的交易数量的平均量 
+  /**
+   *
+   * @param df  data clean 数据
+   * @return
+   * @description  平均每单购物数量
+   */
+  def get_i_average_basket(df: DataFrame): DataFrame ={
+
+    df.select("uid", "prodno")
+
+
+
+  }
 
 
 
@@ -145,8 +167,9 @@ object ITotal {
 //
 //    result.orderBy(desc("i_orders_count")).show(5)
 
+    val value: Dataset[Row] = iTotal.get_i_total_distinct_users(df)
 
-
+    value.show(5)
 
   }
 
