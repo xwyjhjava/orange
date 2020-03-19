@@ -7,6 +7,7 @@ import org.junit.Test
 
 import scala.collection.mutable
 import scala.io.{BufferedSource, Source}
+import scala.util.Random
 
 /**
  * @Package com.dreams.test
@@ -20,7 +21,8 @@ object TestMainScala {
   def main(args: Array[String]): Unit = {
 //    run01()
 //      testReadFile()
-    saveCsvFile()
+//    saveCsvFile()
+    randomTest()
   }
 
   def run01(): Unit ={
@@ -87,5 +89,34 @@ object TestMainScala {
       .csv("D:\\xiaoi\\lp")
 
   }
+
+
+  def randomTest(): Unit ={
+
+    val random = new Random()
+
+
+    val spark = SparkSession.builder()
+      .appName("save file")
+      .master("local[*]")
+      .getOrCreate()
+
+
+    val sc: SparkContext = spark.sparkContext
+
+    val rdd: RDD[(String, String)] = sc.makeRDD(Seq(
+      ("A", "1"),
+      ("A", "2")
+    ))
+
+    val new_rdd: RDD[(String, String)] = rdd.map(x => {
+      val new_key: String = x._1 + "_" + random.nextInt(2)
+      (new_key, x._2)
+    })
+
+    new_rdd.foreach(println)
+
+  }
+
 
 }

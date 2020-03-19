@@ -2,7 +2,10 @@ package com.dreams.spark
 
 import java.util.logging.Level
 
+import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.SparkSession
+
+import scala.util.Random
 
 /**
  * @package com.dreams.spark
@@ -20,7 +23,7 @@ object WordCount {
       .master("local[2]")
       .getOrCreate()
 
-    spark.read.csv("")
+//    spark.read.csv("")
 
     val sc = spark.sparkContext
     sc.setLogLevel("ERROR")
@@ -30,13 +33,29 @@ object WordCount {
     //make rdd
     val rdd = sc.makeRDD(array)
     //map and reduce
-    rdd.map(x => {
-      (x._1, x._2 + 1)
-    }).collect().foreach(println)
-    println("============================")
-    rdd.flatMap(x => List((x._1, x._2 + 1)))
-      .foreach(println)
-    println("===========================")
+//    rdd.map(x => {
+//      (x._1, x._2 + 1)
+//    }).collect().foreach(println)
+//    println("============================")
+//    rdd.flatMap(x => List((x._1, x._2 + 1)))
+//      .foreach(println)
+//    println("===========================")
+
+
+    val random = new Random()
+    val new_rdd: RDD[(String, Int)] = rdd.map(x => {
+
+      val new_key: String = x._1 + "_" + random.nextInt(10)
+      (new_key, x._2)
+    })
+
+    new_rdd.foreach(println)
+
+
+
   }
+
+
+
 
 }

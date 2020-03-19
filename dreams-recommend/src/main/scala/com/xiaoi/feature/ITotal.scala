@@ -96,7 +96,7 @@ class ITotal(private val spark: SparkSession) extends Serializable {
   }
 
 
-  // TODO: 含有本商品的交易回合的交易数量的平均量 
+  // TODO: 含有本商品的交易回合的交易数量的平均量
   /**
    *
    * @param df  data clean 数据
@@ -132,7 +132,6 @@ object ITotal {
       .getOrCreate()
 
     import spark.implicits._
-
     val df: Dataset[Row] = spark.read
       .option("inferSchema", true)
       .textFile("D:\\data\\rec_min.txt")
