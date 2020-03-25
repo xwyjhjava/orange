@@ -1,6 +1,8 @@
 package com.xiaoi
 
 import org.apache.log4j.{Level, Logger}
+import org.apache.spark.SparkContext
+import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.{Dataset, Row, SparkSession}
 import org.slf4j.LoggerFactory
 
@@ -70,6 +72,23 @@ object MainTest {
 
     val user_count: Long = df.select("userId").distinct().count()
     println("user_count =>" + user_count)
+
+
+    val sc: SparkContext = spark.sparkContext
+
+    val rdd: RDD[Int] = sc.makeRDD(1 to 5, 2)
+
+    rdd
+      .mapPartitionsWithIndex((x, iter) => {
+        var result = List[String]()
+        var i = ""
+        while (iter.hasNext){
+          i = i + ":" + iter.next()
+        }
+        result.::(x + "|" + i).iterator
+      }).collect()
+
+
 
 
   }

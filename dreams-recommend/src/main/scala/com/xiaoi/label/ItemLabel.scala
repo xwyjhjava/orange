@@ -1,14 +1,18 @@
 package com.xiaoi.label
 
 import java.sql.Timestamp
-import java.util.Collections
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.mongodb.{BasicDBList, BasicDBObject}
+import com.mongodb.spark.config.WriteConfig
 import com.xiaoi.config.CalendarConfig
 import org.apache.log4j.{Level, Logger}
 import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.rdd.RDD
-import org.apache.spark.sql.functions.hour
-import org.apache.spark.sql.{DataFrame, Dataset, Row, SaveMode, SparkSession}
+import org.apache.spark.sql.{DataFrame, SaveMode, SparkSession}
+import org.bson.Document
+
+import scala.collection.mutable.ListBuffer
 
 /**
  * @Package com.xiaoi.label
@@ -35,9 +39,16 @@ import org.apache.spark.sql.{DataFrame, Dataset, Row, SaveMode, SparkSession}
 class ItemLabel(private val spark: SparkSession) extends Serializable {
 
 
-  private val WORK_AND_HOLIDAY_INPUT_PATH = "D:\\ming\\bigdata\\datasupermarket\\workAndHolidayLabel"
-  private val HOLIDAY_LABEL_INPUT_PATH = "D:\\ming\\bigdata\\datasupermarket\\holidayLabel"
+  private val WORK_AND_HOLIDAY_OUTPUT_PATH = "D:\\ming\\bigdata\\datasupermarket\\workAndHolidayLabel"
+  private val HOLIDAY_LABEL_OUTPUT_PATH = "D:\\ming\\bigdata\\datasupermarket\\holidayLabel"
+  private val TIMESTAMP_LABEL_OUTPUT_PATH = "D:\\ming\\bigdata\\datasupermarket\\timestampLabel"
+  private val SEASON_LABEL_OUTPUT_PATH = "D:\\ming\\bigdata\\datasupermarket\\seasonLabel"
   private val SALE_LABEL_OUTPUT_PATH = "D:\\ming\\bigdata\\datasupermarket\\saleLabel"
+  private val SAME_CATEGORY_OUTPUT_PATH = "D:\\ming\\bigdata\\datasupermarket\\sameCategoryLabel"
+
+
+
+  private val mapper = new ObjectMapper()
 
 
 
@@ -65,8 +76,212 @@ class ItemLabel(private val spark: SparkSession) extends Serializable {
 //    getTimestampLabel(df).show(10)
 //    getSeasonLabel(df).show(10)
 //      getSaleDegreeLabel(df).show(10)
-    getSameCategoryLabel(df)
+//    val result: DataFrame = getSameCategoryLabel(df)
+
+
+    val writeConfig = WriteConfig(Map(
+          "uri" -> "mongodb://xiaoi:xiaoi@127.0.0.1:27017/recommend",
+          "collection" -> "itemLabel"
+        ))
+
+//
+    val workAndHolidayRDD: RDD[(Integer, String)] = readLabelData(spark, WORK_AND_HOLIDAY_OUTPUT_PATH, "work_holiday_label")
+//    workAndHolidayRDD.take(5).foreach(println)
+    println("workholiday --" + workAndHolidayRDD.count())
+    println(" ================== ")
+
+    import com.mongodb.spark._
+
+    workAndHolidayRDD.map(x => {
+      val document = new Document()
+
+      document.append("item_id", x._1)
+        .append("labels", new Document().append("工作日/节假日畅销", x._2))
+      document
+    })
+      .saveToMongoDB(writeConfig)
+
+
+    val holidayRDD: RDD[(Integer, String)] = readLabelData(spark, HOLIDAY_LABEL_OUTPUT_PATH, "holiday_label")
+//    holidayRDD.take(5).foreach(println)
+    println("holiday --" + holidayRDD.count())
+    println(" ================== ")
+
+
+    //
+//
+    val timestampRDD: RDD[(Integer, String)] = readLabelData(spark, TIMESTAMP_LABEL_OUTPUT_PATH, "timestamp_label")
+//    timestampRDD.take(5).foreach(println)
+    println("timestamp --" + timestampRDD.count())
+
+    val filterCount = timestampRDD
+      .filter(x => {x._2 != null && x._2 != ""}).count()
+    println("filter timestamp --" + filterCount)
+
+    println(" ================== ")
+
+
+
+//    timestampRDD
+//       .map(x => {
+//        val document = new Document()
+//
+//        val arr: Array[Int] = Array(1, 2, 3)
+//
+//        val dBList = new BasicDBList()
+//
+//        val obj = new BasicDBObject()
+//        obj.append("时间段畅销", x._2)
+//
+//        val obj2 = new BasicDBObject()
+//        obj2.append("时间段畅销2", x._2)
+//
+//        dBList.add(obj)
+//        dBList.add(obj2)
+//
+//        document.put("item_id", x._1)
+//        document.put("labels", dBList.toString)
+//        document
+//    })
+
+//      .saveToMongoDB(writeConfig)
+
+
+    //
+//
+//
+//    val seasonRDD: RDD[(Integer, String)] = readLabelData(spark, SEASON_LABEL_OUTPUT_PATH, "season_label")
+////    seasonRDD.take(5).foreach(println)
+//    println("season --" + seasonRDD.count())
+//    println(" ================== ")
+//
+//
+//
+//    val saleRDD: RDD[(Integer, String)] = readLabelData(spark, SALE_LABEL_OUTPUT_PATH, "sale_label")
+////    saleRDD.take(5).foreach(println)
+//    println("sale --" + saleRDD.count())
+//    println(" ================== ")
+//
+//
+//    val sameCategoryRDD: RDD[(Integer, String)] = readLabelData(spark, SAME_CATEGORY_OUTPUT_PATH, "same_category_label")
+////    sameCategoryRDD.take(5).foreach(println)
+//    println("sameCategory -- " + sameCategoryRDD.count())
+
+//    val workHolidayDF: DataFrame = readLabelData(spark, WORK_AND_HOLIDAY_OUTPUT_PATH, "work_holiday_label")
+//      .toDF("item_id", "work_holiday_label")
+//
+//
+//    getHolidayLabel(workHolidayDF)
+//
+//    getTimestampLabel(df)
+//
+//    getSeasonLabel(df)
+//
+//    getSaleDegreeLabel(df)
+//
+//    getSameCategoryLabel(df)
+
+
+
+
+
+
+
+
+
+//    val labelRDD: RDD[(Integer, String)] = spark.read
+//      .option("header", true)
+//      .option("inferSchema", true)
+//      .csv(SAME_CATEGORY_OUTPUT_PATH)
+//      .map(row => {
+//        val item_id: Integer = row.getAs[Integer]("item_id")
+//        val label: String = row.getAs[String]("same_category_label")
+//        (item_id, label)
+//      }).rdd
+//
+//    labelRDD.take(10).foreach(println)
+//    println("====================")
+
+
+//    val resultRDD: RDD[Document] = labelRDD.map(row => {
+//
+//
+//      val item_id: Integer = row._1
+//      val label: String = row._2
+//
+//
+////      val jsonString = "{\"item_id\":" + item_id + "," + "\"label\" " + ":" + label + "}"
+////      val jsonString = s"{\"item_id\":$item_id, \"label\":\"$label\"}"
+////      val map = Map(
+////        row._1 -> row._2
+////      )
+////      val jsonString: String = mapper.writeValueAsString(map)
+//      // 构建json
+////      val document: Document = Document.parse(jsonString)
+//
+//
+//      val document = new Document()
+//
+//      document.put("item_id", item_id)
+//      document.put("label", label)
+//
+//
+//      document
+//
+//    })
+//
+//    resultRDD.map(doc => {
+//      val itemId: AnyRef = doc.get("item_id")
+//      val label: AnyRef = doc.get("label")
+//      (itemId, label)
+//    })
+//      .take(10)
+//      .foreach(println)
+//
+//    val writeConfig = WriteConfig(Map(
+//      "uri" -> "mongodb://xiaoi:xiaoi@127.0.0.1:27017/recommend",
+//      "collection" -> "itemLabel"
+//    ))
+//
+    import com.mongodb.spark._
+//    resultRDD.saveToMongoDB(writeConfig)
+
+//    MongoUtil.sparkWriteCol(resultRDD)
+//    println("save success")
+
   }
+
+
+
+  def getAllItemLable(df: DataFrame, calendar_df: DataFrame): Unit = {
+
+    val itemRDD: RDD[(Integer, Integer)] = df.map(row => {
+
+      val itemId: Integer = row.getAs[Integer]("itemId")
+      val categoryId: Integer = row.getAs[Integer]("dptno")
+      (itemId, categoryId)
+    }).rdd
+
+
+    itemRDD.map(item => {
+
+
+
+    })
+
+
+
+
+
+
+
+  }
+
+
+
+
+
+
 
   /**
    *
@@ -152,11 +367,9 @@ class ItemLabel(private val spark: SparkSession) extends Serializable {
         (itemId, resultLabel)
       })
     val resultDF: DataFrame = resultLabelRDD.toDF("item_id", "work_holiday_label")
-    resultDF.coalesce(1)
-      .write
-      .mode(SaveMode.Overwrite)
-      .option("header", true)
-      .csv(WORK_AND_HOLIDAY_INPUT_PATH)
+
+    saveLabelDFResult(resultDF, WORK_AND_HOLIDAY_OUTPUT_PATH)
+
     resultDF
   }
 
@@ -184,16 +397,19 @@ class ItemLabel(private val spark: SparkSession) extends Serializable {
 
         (itemId, holidayLabel+"畅销")
       }).toDF("item_id", "holiday_label")
-    
-    holidayDF.coalesce(1)
-        .write
-        .mode(SaveMode.Overwrite)
-        .option("header", true)
-        .csv(HOLIDAY_LABEL_INPUT_PATH)
+
+    saveLabelDFResult(holidayDF, HOLIDAY_LABEL_OUTPUT_PATH)
+
     holidayDF
   }
 
 
+  /**
+   *
+   * @param df
+   * @return
+   * @description  计算时间段的标签
+   */
   private def getTimestampLabel(df: DataFrame): DataFrame ={
 
     import org.apache.spark.sql.functions._
@@ -257,7 +473,10 @@ class ItemLabel(private val spark: SparkSession) extends Serializable {
 
       }).toDF("item_id", "timestamp_label")
 
-      timestampLabel
+
+    saveLabelDFResult(timestampLabel, TIMESTAMP_LABEL_OUTPUT_PATH)
+
+    timestampLabel
   }
 
 
@@ -319,7 +538,10 @@ class ItemLabel(private val spark: SparkSession) extends Serializable {
         val seasonLabel: String = orderInSeasonMap.get(max_count).get + ":" + max_ration
         (itemId, seasonLabel)
 
-      }).toDF("item_id", "timestamp_label")
+      }).toDF("item_id", "season_label")
+
+
+    saveLabelDFResult(seasonLabel, SEASON_LABEL_OUTPUT_PATH)
 
     seasonLabel
 
@@ -367,9 +589,6 @@ class ItemLabel(private val spark: SparkSession) extends Serializable {
       val rankIndex: Long = ele._2 + 1
       (itemId, rankIndex)
     })
-
-
-
 
 
     // 总的item个数
@@ -425,11 +644,7 @@ class ItemLabel(private val spark: SparkSession) extends Serializable {
     }).toDF("item_id", "sale_label")
 
 
-    saleLabelDF.coalesce(1)
-        .write
-        .option("header", true)
-        .mode(SaveMode.Overwrite)
-        .csv(SALE_LABEL_OUTPUT_PATH)
+    saveLabelDFResult(saleLabelDF, SALE_LABEL_OUTPUT_PATH)
 
     saleLabelDF
   }
@@ -452,34 +667,98 @@ class ItemLabel(private val spark: SparkSession) extends Serializable {
       }).rdd
 
 
-    itemRDD.groupByKey()
-        .map(ele => {
+    val resultLabelDF: DataFrame = itemRDD.groupByKey()
+      // 过滤品类下小于三笔成交量的
+      .filter(_._2.size > 2)
+      .map(ele => {
 
-          val categoryId: Integer = ele._1
-          val itemList: List[Integer] = ele._2.toList
+        val itemList: List[Integer] = ele._2.toList
 
-          ele._2
+        val sortedItemList: List[(Integer, Int)] = itemList.map((_, 1))
+          .groupBy(_._1)
+          .mapValues(x => {
+            // 统计每个item的销售量
+            x.size
+          })
+          .map(item => {
+            val itmId: Integer = item._1
+            val count: Int = item._2
+            (itmId, count)
+          })
+          .toList
+          // 得到item销量的降序rank
+          .sortWith(_._2 > _._2)
 
+        // rank == 1 ， 排名靠前
+        // rank == totalSize , 排名靠后
+        // rank == 其他，  排名居中
 
-//          itemList.groupBy(_).map()
+        val listBuffer = new ListBuffer[String]
 
-//          itemList.map(x => {(x, 1)}).groupBy(_._1).map()
-          // 遍历每个品类
-          itemList.foreach(item => {
+        //同品类排名靠前
+        val headRankItemId: Integer = sortedItemList.take(1)(0)._1
+        listBuffer.append(headRankItemId + ":同品类排名靠前")
+        //同品类排名靠后
+        val tailRankItemId: Integer = sortedItemList.takeRight(1)(0)._1
+        listBuffer.append(tailRankItemId + ":同品类排名靠后")
+        // 同品类排名居中
 
-
+        sortedItemList.filter(x => {
+          x._1 != headRankItemId && x._1 != tailRankItemId
+        })
+          .foreach(ele => {
+            listBuffer.append(ele._1 + ":同品类排名居中")
           })
 
-        })
+        listBuffer.toList
+
+      })
+      .flatMap(e => {e})
+      .map(e => {
+        val array: Array[String] = e.split(":")
+        val itemId: String = array(0)
+        val sameCategoryLabel: String = array(1)
+        (itemId, sameCategoryLabel)
+      })
+      .toDF("item_id", "same_category_label")
 
 
-    df
+    resultLabelDF.show(10)
+
+    resultLabelDF.coalesce(1)
+        .write
+        .mode(SaveMode.Overwrite)
+        .option("header", true)
+        .csv(SAME_CATEGORY_OUTPUT_PATH)
+
+    
+    
+    
+    resultLabelDF
+    
+    
   }
 
+  // TODO: 周销售趋势
+
+  // TODO: 月销售趋势
+
+  // TODO: 复购周期
 
 
 
+  // 销售标签
 
+  // TODO: 颜色偏好
+
+
+  // TODO: 物品档次
+
+
+  // TODO: 价格水平
+
+
+  // TODO: 场景标签
 
 
   /**
@@ -500,7 +779,45 @@ class ItemLabel(private val spark: SparkSession) extends Serializable {
     calendarMap
   }
 
+  /**
+   *
+   * @param spark
+   * @param input_path
+   * @return
+   * @description 读取中间结果
+   */
 
+  private def readLabelData(spark: SparkSession,
+                            input_path: String,
+                            labelField: String): RDD[(Integer, String)] ={
+
+    val rdd: RDD[(Integer, String)] = spark.read
+      .option("header", true)
+      .option("inferSchema", true)
+      .csv(input_path)
+      .map(row => {
+        val item_id: Integer = row.getAs[Integer]("item_id")
+        val label: String = row.getAs[String](labelField)
+        (item_id, label)
+      }).rdd
+    rdd
+  }
+
+
+  /**
+   *
+   * @param dataFrame
+   * @param save_path
+   * @description 保存label的dataframe
+   */
+  private def saveLabelDFResult(dataFrame: DataFrame, save_path: String): Unit ={
+
+    dataFrame.coalesce(1)
+      .write
+      .mode(SaveMode.Overwrite)
+      .option("header", true)
+      .csv(save_path)
+  }
 
 
 
