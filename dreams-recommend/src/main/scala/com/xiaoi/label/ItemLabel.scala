@@ -82,6 +82,9 @@ class ItemLabel(private val spark: SparkSession) extends Serializable {
   def buildItemLabel(df: DataFrame, calendar_df: DataFrame): Unit ={
 
 
+
+    // 调用标签生成的方法
+    
     val writeConfig = WriteConfig(Map(
           "uri" -> "mongodb://xiaoi:xiaoi@127.0.0.1:27017/recommend",
           "collection" -> "itemLabel"
