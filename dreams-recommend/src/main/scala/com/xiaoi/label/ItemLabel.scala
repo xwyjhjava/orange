@@ -3,13 +3,10 @@ package com.xiaoi.label
 import java.sql.Timestamp
 import java.util
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.mongodb.bulk.BulkWriteResult
 import com.mongodb.client.model.UpdateOneModel
-import com.mongodb.{BasicDBList, BasicDBObject}
 import com.mongodb.spark.config.WriteConfig
 import com.xiaoi.config.CalendarConfig
-import com.xiaoi.util.MongoUtil
 import com.xiaoi.util.MongoUtil.mongoDBConn
 import org.apache.log4j.{Level, Logger}
 import org.apache.spark.broadcast.Broadcast

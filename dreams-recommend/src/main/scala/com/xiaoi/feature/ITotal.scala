@@ -196,10 +196,10 @@ class ITotal(private val spark: SparkSession) extends Serializable {
   /**
    *
    * @param df  data_clean 数据
-   * @return    （item_id）
-   * @decription item的时间分布
+   * @return    （yearDF, monthDF, dayDF, hourDF）
+   * @description item的时间分布
    */
-  private def get_i_time_distribute(df: DataFrame): DataFrame ={
+  private def get_i_time_distribute(df: DataFrame):(DataFrame, DataFrame, DataFrame, DataFrame) ={
 
     // 按照 年、月、日、时 提取时间
     val itemTimeDF: DataFrame = df
@@ -214,7 +214,7 @@ class ITotal(private val spark: SparkSession) extends Serializable {
     val dayDF: DataFrame = group_by_cols(itemTimeDF, "itemId", "day")
     val hourDF: DataFrame = group_by_cols(itemTimeDF, "itemId", "hour")
     
-    df
+    (yearDF, monthDF, dayDF, hourDF)
   }
 
 
