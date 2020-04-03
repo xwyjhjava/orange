@@ -16,6 +16,7 @@
         <module>dreams-thread</module>
         <module>dreams-test</module>
         <module>dreams-recommend</module>
+        <module>dreams-toutiao</module>
     </modules>
 
     <packaging>pom</packaging>
