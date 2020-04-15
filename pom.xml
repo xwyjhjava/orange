@@ -22,8 +22,7 @@
     <packaging>pom</packaging>
 
     <name>dreams</name>
-    <!--<url>http://www.ruoyi.vip</url>-->
-    <description>个人弹幕网站模块化版</description>
+    <description>个人微服务</description>
     <properties>
         <java.version>1.8</java.version>
     </properties>

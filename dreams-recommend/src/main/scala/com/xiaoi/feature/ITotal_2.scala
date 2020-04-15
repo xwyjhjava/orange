@@ -32,7 +32,7 @@ import org.apache.spark.sql.types.DataTypes
 //|-- gender: integer (nullable = true)
 //|-- birthday: timestamp (nullable = true)
 //|-- createdate: timestamp (nullable = true)
-class ITotal(private val spark: SparkSession) extends Serializable {
+class ITotal_2(private val spark: SparkSession) extends Serializable {
 
 
   /**
@@ -246,7 +246,7 @@ class ITotal(private val spark: SparkSession) extends Serializable {
 
 }
 
-object ITotal {
+object ITotal_2 {
 
   def main(args: Array[String]): Unit = {
 
@@ -259,6 +259,9 @@ object ITotal {
       .appName("item feature")
       .master("local[*]")
       .getOrCreate()
+
+
+
 
 
     val df: DataFrame = spark.read
@@ -283,7 +286,7 @@ object ITotal {
     println(tmp)
 
 
-    val iTotal = new ITotal(spark)
+    val iTotal = new ITotal_2(spark)
 
 //    val result: Dataset[Row] = iTotal.get_i_total_orders(df)
 //
@@ -292,7 +295,7 @@ object ITotal {
     df.printSchema()
 
 
-    val value: Dataset[Row] = iTotal.get_i_time_distribute(df)
+//    val value: Dataset[Row] = iTotal.get_i_time_distribute(df)
 
 
 
