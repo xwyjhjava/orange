@@ -3,6 +3,7 @@ package com.xiaoi.feature
 import com.xiaoi.common.HadoopOpsUtil
 import org.apache.log4j.{Level, Logger}
 import org.apache.spark.rdd.RDD
+import org.apache.spark.sql.SparkSession
 import org.apache.spark.{SparkConf, SparkContext}
 import org.slf4j.LoggerFactory
 import scopt.OptionParser
@@ -17,26 +18,50 @@ object uiTrend {
   Logger.getLogger("org").setLevel(Level.ERROR)
 
   def run(params: Params): Unit = {
-    val conf = new SparkConf().setAppName("step_5_6to7 or uiTrend")
-    val sc = new SparkContext(conf)
+
+    val sparkSession: SparkSession = SparkSession.builder()
+      .appName("step_5_6 ui_strike")
+      .master("local[*]")
+      .getOrCreate()
+    val sc: SparkContext = sparkSession.sparkContext
+
+
     HadoopOpsUtil.removeDir(params.ui_order_strike_output_path, params.ui_order_strike_output_path)
     HadoopOpsUtil.removeDir(params.ui_strike_output_path, params.ui_strike_output_path)
     HadoopOpsUtil.removeDir(params.ui_trend_output_path, params.ui_trend_output_path)
 
     //user_id，item_id，basket_list
+    // 准备数据  user_basket_has_item_list
     val user_baskets_has_item_list = get_baskets_items(
       params.user_baskets_has_item_list_intput_path, sc)
 
     logger.info("ui_order_strike write...")
+    //step_5_6
+    /**
+     * user_id
+     * item_id
+     * strike_value
+     */
     val ui_order_strike = get_ui_order_strike(user_baskets_has_item_list)
     ui_order_strike.saveAsTextFile(params.ui_order_strike_output_path)
 
     logger.info("ui_strike write...")
+    // step_5_6
+    /**
+     * user_id
+     * item_id
+     * 、、、
+     */
     val ui_strike = get_ui_strike(user_baskets_has_item_list)
     ui_strike.saveAsTextFile(params.ui_strike_output_path)
 
     logger.info("ui_trend data extracting...")
-    //user_id, item_id, 1_month, 2_month, 3_month, 4_month, 5_month, 6_month
+    //step_5_7
+    /**
+     * user_id
+     * item_id
+     * trend
+     */
     val ui_trend = get_ui_trend(params.user_item_frequency_month_input_path,
       params.trend_delta, sc)
     ui_trend.saveAsTextFile(params.ui_trend_output_path)

@@ -3,6 +3,7 @@ package com.xiaoi.feature
 import com.xiaoi.common.HadoopOpsUtil
 import org.apache.log4j.{Level, Logger}
 import org.apache.spark.rdd.RDD
+import org.apache.spark.sql.SparkSession
 import org.apache.spark.{SparkConf, SparkContext}
 import org.slf4j.LoggerFactory
 import scopt.OptionParser
@@ -19,8 +20,14 @@ object uClass {
   Logger.getLogger("org").setLevel(Level.ERROR)
 
   def run(params: Params): Unit = {
-    val conf = new SparkConf().setAppName("step_5_26to27 or uClass")
-    val sc = new SparkContext(conf)
+
+    val sparkSession: SparkSession = SparkSession.builder()
+      .appName("step_5_26to27 or uClass")
+      .master("local[*]")
+      .getOrCreate()
+    val sc: SparkContext = sparkSession.sparkContext
+
+
     remove_exist_dir(params)
     logger.info("step_5_26to27 中间数据生成......")
 
@@ -35,6 +42,12 @@ object uClass {
     val user_class = user_info_rdd._4
 
     logger.info("u_distinct_classes saving...... ")
+    //step_5_26
+    /**
+     * user_id
+     * count
+     * ratio
+     */
     val u_distinct_classes = get_u_distinct_classes(data_simplified, user_class)
     u_distinct_classes.repartition(1)
       .saveAsTextFile(params.u_distinct_classes_output_path)
@@ -42,15 +55,25 @@ object uClass {
     val user_class_count = get_user_class_count(user_class)
 
     logger.info("u_class_ratio saving...... ")
+    /**
+     * user_id
+     * w1, w2,....., w10
+     */
     val u_class_ratio = get_u_class_ratio(data_simplified, user_class_count,
       topn_class_rdd, params.topn_class_ratio)
     u_class_ratio.repartition(1).saveAsTextFile(params.u_class_ratio_output_path)
 
     logger.info("u_classes_top5 saving...... ")
+    /**
+     * user_id
+     * dptno
+     * count
+     */
     val u_classes_top5 = get_u_classes_top5(user_class_count, params.topn_class)
     u_classes_top5.repartition(1).saveAsTextFile(params.u_classes_top5_output_path)
 
     logger.info("u_trend saving...... ")
+    //step_5_27
     u_trend.repartition(1).saveAsTextFile(params.u_trend_output_path)
 
     sc.stop()

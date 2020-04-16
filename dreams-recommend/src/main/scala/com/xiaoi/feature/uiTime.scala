@@ -5,6 +5,7 @@ import java.text.SimpleDateFormat
 import com.xiaoi.common.{DateUtil, HadoopOpsUtil}
 import org.apache.log4j.{Level, Logger}
 import org.apache.spark.rdd.RDD
+import org.apache.spark.sql.SparkSession
 import org.apache.spark.{SparkConf, SparkContext}
 import org.slf4j.LoggerFactory
 import scopt.OptionParser
@@ -19,8 +20,13 @@ object uiTime {
   Logger.getLogger("org").setLevel(Level.ERROR)
 
   def run(params: Params): Unit = {
-    val conf = new SparkConf().setAppName("step_5_4 or uiTime")
-    val sc = new SparkContext(conf)
+
+    val sparkSession: SparkSession = SparkSession.builder()
+      .appName("step_5_4 or uiTime")
+      .master("local[*]")
+      .getOrCreate()
+    val sc: SparkContext = sparkSession.sparkContext
+
     HadoopOpsUtil.removeDir(params.ui_time_dow_output_path, params.ui_time_dow_output_path)
     HadoopOpsUtil.removeDir(params.ui_time_hour_output_path, params.ui_time_hour_output_path)
     HadoopOpsUtil.removeDir(params.ui_time_month_output_path, params.ui_time_month_output_path)

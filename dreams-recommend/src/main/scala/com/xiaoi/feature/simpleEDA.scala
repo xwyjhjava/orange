@@ -5,6 +5,7 @@ import com.xiaoi.common.{FrequencyUtil, HadoopOpsUtil, StatsUtil}
 import com.xiaoi.constant.Constants
 import org.apache.log4j.{Level, Logger}
 import org.apache.spark.rdd.RDD
+import org.apache.spark.sql.SparkSession
 import org.apache.spark.{SparkConf, SparkContext}
 import org.slf4j.LoggerFactory
 import scopt.OptionParser
@@ -22,28 +23,61 @@ object simpleEDA {
 
   def run(params: Params): Unit = {
     val now_date = params.now_date
-    val conf = new SparkConf().setAppName("simpleEDA or step_4")
-    val sc = new SparkContext(conf)
+
+
+    val sparkSession: SparkSession = SparkSession.builder()
+      .appName("simpleEDA")
+      .master("local[*]")
+      .getOrCreate()
+    val sc: SparkContext = sparkSession.sparkContext
+
     remove_output_dir(params)
 
     logger.info("step_4 中间数据生成..(simpleEDA)....")
+    // 准备数据， 使用data_simplified
     val data_simplified = read_data_simplified(sc, params.data_simplified_input_path)
+    // 准备数据， 使用user_basket_money
     val user_basket_money = read_user_basket_money(sc, params.user_basket_money_input_path)
 
+
     //计算商品单价的sta
-    logger.info("item_price_sta saving......")
+    logger.info("step_4_1 item_price_sta saving......")
+    /**
+     * item_id
+     * min
+     * max
+     * median
+     * avg
+     * std
+     */
     val item_price_sta = get_item_price_sta(data_simplified)
     item_price_sta.repartition(1).saveAsTextFile(params.item_price_sta_output_path)
 
     //商品，距离观察点时间段中的交易记录数
     val item_frequency = get_item_frequency(data_simplified, now_date)
 
-    logger.info("item_frequency_year saving......")
+    logger.info("step_4_2 item_frequency_year saving......")
+    /**
+     * item_id
+     * half_year : 半年内被采购的次数（也就是半年内log_count）
+     * 2nd_half_year : 半年前到一年前被采购的次数
+     * 2nd_year :  一年前到两年前时段内被采购的次数
+     * 3rd_year :  两年前到三年前时段内被采购的次数
+     */
     val item_frequency_year = get_item_frequency_year(item_frequency)
     item_frequency_year.repartition(1)
       .saveAsTextFile(params.item_frequency_year_output_path)
 
     logger.info("item_frequency_month saving......")
+    /**
+     * item_id
+     * 1_month
+     * 2_month
+     * 3_month
+     * 4_month
+     * 5_month
+     * 6_month
+     */
     val item_frequency_month = get_item_frequency_month(item_frequency)
     item_frequency_month.repartition(1)
       .saveAsTextFile(params.item_frequency_month_output_path)
@@ -53,18 +87,36 @@ object simpleEDA {
     item_frequency_day.repartition(1)
       .saveAsTextFile(params.item_frequency_day_output_path)
 
-    logger.info("user_basket_money_sta saving......")
+    logger.info("step_4_11 user_basket_money_sta saving......")
+    /**
+     *  user_id
+     *  min
+     *  max
+     *  median
+     *  avg
+     *  std
+     */
+    // user_basket_money_sta 每单花了多少钱
     val user_basket_money_sta = get_user_basket_money_sta(user_basket_money)
     user_basket_money_sta.repartition(1)
       .saveAsTextFile(params.user_basket_money_sta_output_path)
 
     logger.info("user_log_money_sta saving......")
+    /**
+     * user_id
+     * min
+     * max
+     * median
+     * avg
+     * std
+     */
+    //user_log_money_sta  每单每个商品花了多少钱
     val user_log_money_sta = get_user_log_money_sta(user_basket_money)
     user_log_money_sta.repartition(1)
       .saveAsTextFile(params.user_log_money_sta_output_path)
 
 
-    //用户  每一条记录据观察点的时间段中的交易记录数
+    //step_4_12  用户  每一条记录据观察点的时间段中的交易记录数
     val user_frequency = get_user_frequency(user_basket_money, now_date)
 
     logger.info("user_frequency_year saving......")
@@ -84,7 +136,7 @@ object simpleEDA {
       .saveAsTextFile(params.user_frequency_day_output_path)
 
 
-    //用户  每一条记录据当前观察点的时间段中, 每一次购物的消费金额
+    //step_4_13  用户  每一条记录据当前观察点的时间段中, 每一次购物的消费金额
     val user_money = get_user_money(user_basket_money, now_date)
 
     logger.info("user_money_year saving......")
@@ -99,7 +151,7 @@ object simpleEDA {
     val user_money_day = get_user_money_day(user_money)
     user_money_day.repartition(1).saveAsTextFile(params.user_money_day_output_path)
 
-    //该用户，该商品，距离观察点的时间
+    //step_4_21 该用户，该商品，距离观察点的时间
     val user_item_between_days = get_user_item_between_days(data_simplified, now_date)
 
     logger.info("user_item_frequency_month saving......")

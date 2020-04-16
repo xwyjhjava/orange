@@ -10,6 +10,8 @@ package com.xiaoi.label
 class UserLabel {
 
 
+
+
 }
 
 object UserLabel{

@@ -3,6 +3,7 @@ package com.xiaoi.feature
 import com.xiaoi.common.{DateUtil, HadoopOpsUtil, StatsUtil}
 import org.apache.log4j.{Level, Logger}
 import org.apache.spark.rdd.RDD
+import org.apache.spark.sql.SparkSession
 import org.apache.spark.{SparkConf, SparkContext}
 import org.slf4j.LoggerFactory
 import scopt.OptionParser
@@ -14,8 +15,14 @@ object uTotal {
   Logger.getLogger("org").setLevel(Level.ERROR)
 
   def run(params: Params): Unit = {
-    val conf = new SparkConf().setAppName("step_5_21to23 or uTotal")
-    val sc = new SparkContext(conf)
+
+    val sparkSession: SparkSession = SparkSession.builder()
+      .appName("step_5_21to23 uTotal")
+      .master("local[*]")
+      .getOrCreate()
+    val sc: SparkContext = sparkSession.sparkContext
+
+
     HadoopOpsUtil.removeDir(params.u_each_item_count_sta_output_path, params.u_each_item_count_sta_output_path)
     HadoopOpsUtil.removeDir(params.u_total_sessions_rank_percent_output_path, params.u_total_sessions_rank_percent_output_path)
     HadoopOpsUtil.removeDir(params.u_meta_info_output_path, params.u_meta_info_output_path)
@@ -25,6 +32,7 @@ object uTotal {
     HadoopOpsUtil.removeDir(params.u_basket_size_sta_output_path, params.u_basket_size_sta_output_path)
     HadoopOpsUtil.removeDir(params.u_basket_money_slot_percent_output_path, params.u_basket_money_slot_percent_output_path)
 
+    // 准备数据
     val user_info_rdd = get_user_info(sc,
       params.data_simplified_input_path,
       params.user_total_input_path,
@@ -37,38 +45,95 @@ object uTotal {
     val user_item_count = user_info_rdd._5
 
     logger.info("u_each_item_count_sta write...")
+    //step_5_21
+    /**
+     * user_id
+     * min
+     * max
+     * median
+     * avg
+     * std
+     */
     val u_each_item_count_sta = get_each_item_count(user_item_count)
     u_each_item_count_sta.repartition(1) .saveAsTextFile(params.u_each_item_count_sta_output_path)
 
     logger.info("u_total_sessions_rank_percent write...")
+    /**
+     * user_id
+     * rank_percent
+     */
     val u_total_sessions_rank_percent = get_u_total_session_rank(user_total)
     u_total_sessions_rank_percent.repartition(1) .saveAsTextFile(params.u_total_sessions_rank_percent_output_path)
 
     logger.info("u_meta_info write...")
+    /**
+     * user_id
+     * age
+     */
     val u_meta_info = get_u_meta_info(user_detail)
     u_meta_info.repartition(1).saveAsTextFile(params.u_meta_info_output_path)
 
     logger.info("u_items_top5 write...")
+    /**
+     * 用户最经常购买的N种商品
+     * user_id
+     * item_id
+     * pluname
+     * count
+     * rank : 该用户内排序
+     *
+     */
     val u_items_top5 = get_u_items_top5(user_item_count,
       user_total, params.topn_user, params.topn_item)
     u_items_top5.repartition(1).saveAsTextFile(params.u_items_top5_output_path)
 
     logger.info("u_item_price_sta write...")
+    //step_5_22
+    /**
+     * user_id
+     * min
+     * max
+     * median
+     * average
+     * std
+     */
     val u_item_price_sta = get_u_item_price(data_simplified)
     u_item_price_sta.repartition(1).saveAsTextFile(params.u_item_price_sta_output_path)
 
     logger.info("u_total_money_rank_percent write...")
+    /**
+     * user_id
+     * total_money
+     * rank_percent
+     */
     val u_total_money_rank_percent = get_u_total_money_rank(sc,
       user_total, params.user_money_year_input_path)
     u_total_money_rank_percent.repartition(1)
       .saveAsTextFile(params.u_total_money_rank_percent_output_path)
 
     logger.info("u_basket_size_sta write...")
+    //step_5_24
+    /**
+     * user_id
+     * min
+     * max
+     * median
+     * avg
+     * std
+     */
     val u_basket_size_sta = get_u_basket_size(user_basket_money)
     u_basket_size_sta.repartition(1)
       .saveAsTextFile(params.u_basket_size_sta_output_path)
 
     logger.info("u_basket_money_slot_percent write...")
+    /**
+     * user_id
+     * w1
+     * w2
+     * w3
+     * w4
+     * w5
+     */
     val u_basket_money_slot_percent = get_u_basket_slot(user_basket_money)
     u_basket_money_slot_percent.repartition(1)
       .saveAsTextFile(params.u_basket_money_slot_percent_output_path)

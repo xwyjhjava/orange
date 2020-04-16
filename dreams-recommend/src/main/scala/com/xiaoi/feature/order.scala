@@ -3,6 +3,7 @@ package com.xiaoi.feature
 import com.xiaoi.common.{DateUtil, HadoopOpsUtil, StatsUtil, StrUtil}
 import org.apache.log4j.{Level, Logger}
 import org.apache.spark.rdd.RDD
+import org.apache.spark.sql.SparkSession
 import org.apache.spark.{SparkConf, SparkContext}
 import org.slf4j.LoggerFactory
 import scopt.OptionParser
@@ -21,8 +22,13 @@ object order extends Serializable {
   val PRIOR_W = List(1, 2, 3, 4, 5)
 
   def run(params: Params): Unit = {
-    val conf = new SparkConf().setAppName("order_5_11to14and25 or order")
-    val sc = new SparkContext(conf)
+
+
+    val sparkSession: SparkSession = SparkSession.builder()
+      .appName("order feature")
+      .master("local[*]")
+      .getOrCreate()
+    val sc: SparkContext = sparkSession.sparkContext
 
     logger.info("step_5 order features生成......")
     HadoopOpsUtil.removeDir(params.o_recency_n5_item_output_path,
@@ -45,6 +51,7 @@ object order extends Serializable {
     HadoopOpsUtil.removeDir(params.u_reorders_duplicate_items_ratio_output_path,
       params.u_reorders_duplicate_items_ratio_output_path)
 
+    // 准备数据  data_14cols_1
     val data_14cols_1 = get_data_14cols_1(params.data_14cols_1_input_path, sc)
     data_14cols_1.cache()
 
@@ -55,31 +62,38 @@ object order extends Serializable {
     val observe_user_item_uid = obverve_info._2
 
     logger.info("key为user+item的order特征一起算完...")
+    //step_5_11 -- step_5_13
     val order_11to13 = get_order_features_by_ui(data_14cols_1,
       params.observe_time_enabled, observe_day)
 
     logger.info("o_recency_n5_item")
+    // user_id , item_id , n1, n2, n3, n4, n5, r1, r2, r3, r4, r5
     order_11to13._1.map(StrUtil.tupleToString(_, "|"))
       .saveAsTextFile(params.o_recency_n5_item_output_path)
 
     logger.info("o_recency_n5_reorder_ratio")
+    // user_id, item_id, w1_ratio, w2_ratio, w3_ratio, w4_ratio, w5_ratio （1最近，5最远 ）
     order_11to13._2.map(StrUtil.tupleToString(_, "|"))
       .saveAsTextFile(params.o_recency_n5_reorder_ratio_output_path)
 
     logger.info("o_recency_n1")
+    //user_id, item_id, days, sessions, reorder_ratio, trend
     order_11to13._3.map(StrUtil.tupleToString(_, "|"))
       .saveAsTextFile(params.o_recency_n1_days_output_path)
 
     logger.info("o_reordered_in_60_day")
+    //user_id, item_id, d1, d3, d7, d15, d30, d60 d1表示最近1天内的购买数量
     order_11to13._4.map(StrUtil.tupleToString(_, "|"))
       .saveAsTextFile(params.o_reordered_in_60_day_output_path)
 
     logger.info("key为user的order特征...")
     val o_days_since_prior = get_order_feature_by_user(data_14cols_1,
       observe_user_item_uid, observe_day)
+    // user_id, last_order_time, days
     o_days_since_prior.map(x => x._1 + "|" + x._2)
       .saveAsTextFile(params.o_u_days_since_prior_order_output_path)
 
+    //step_5_25
     logger.info("u_days_between_orders_sta		字段：user_id, min, max, median, avg, std")
     val u_days_between_orders_sta = get_u_days_between_orders(data_14cols_1)
     u_days_between_orders_sta.map(StrUtil.tupleToString(_, "|"))
@@ -245,9 +259,12 @@ object order extends Serializable {
           (time, items)
         }).mapValues(x => (x._1, x._2.toList)).toList
           .sortBy(_._2._1).reverse //List(uid, (time, Set(item)))
+        //最近5次 特征
         var recency_n5_item = ListBuffer[(String, String, String, String)]()
         var n1_reorder_ratio = ListBuffer[(String, String, String, String)]()
+        //最近1次 特征
         var recency_n1_days = ListBuffer[(String, String, String, String)]()
+        //最近60天
         var reordered_in_60_day = ListBuffer[(String, String, String, String)]()
         var index_flag = 1
         for (iter <- item_group) { //for each uid

@@ -20,8 +20,16 @@ object uDeep {
   val YEAY_DAY = 365.24
 
   def run(params: Params) = {
+
+
     val conf = new SparkConf().setAppName("step_6_11 or uDeep")
     val sc = new SparkContext(conf)
+
+
+
+
+
+
     remove_dir(params)
 
     logger.info("读取输入文件.....")

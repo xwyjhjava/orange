@@ -127,6 +127,11 @@ object MilestoneData {
     val data_14cols = data_14cols_1.union(data_14cols_2).cache()
     val total_log_count = data_14cols.count()
 
+    /**
+     * userId_uid : 用户id和交易号码的对应关系
+     * uid_sldat :  交易号码和交易时间（最早一次交易的时间）的对应关系
+     * uid_item :   交易号码和商品id的对应关系
+     */
     logger.info("step_3_10 user_uid, uid_sldat, uid_item ...")
     val uid_item_uid_triple = get_data_pair(data_14cols, sqlContext)
 //    uid_item_uid_triple._1.saveAsTextFile(user_uid)
@@ -134,23 +139,60 @@ object MilestoneData {
 //    uid_item_uid_triple._3.saveAsTextFile(uid_item)
 
 //    logger.info(s"step_3_31  item_total write: ${item_total}")
+    /**
+     * item_id
+     * first_order_time : 首单日期
+     * log_count
+     * log_ratio ：  该item商品占总的销售数量中的占比 （该item的log_count / 总的log_count） 
+     * session_count 
+     * session_ratio
+     * user_count
+     * user_ratio
+     * money
+     */
+    // TODO: money_ratio 也可以计算
     val item_total_rdd = get_item_total(data_14cols, total_log_count, user_count, session_count)
 //    item_total_rdd.map(tupleToString(_, "|")).saveAsTextFile(item_total)
     item_total_rdd.cache()
 
     logger.info("step_32  item_top100_by_log_count, item_top100_by_user_count write...")
+    /**
+     * item_top100_by_log_count :  item_id , log_count, ratio 按照log_count 排序
+     * item_top100_by_user_count:  item_id , user_count, ratio 按照user_count排序
+     */
     val item_top = get_top_item(item_total_rdd, params.topn_item, sc)
 //    item_top._1.saveAsTextFile(item_top100_by_log_count)
 //    item_top._2.saveAsTextFile(item_top100_by_user_count)
     item_total_rdd.unpersist()
 
     logger.info("step_3_41  class_total  class_top10...  ")
+    /**
+     *  dptno
+     *  log_count
+     *  item_count
+     *  user_count
+     *  session_count
+     *  money
+     *  class_ratio : 该类别商品的log_count / 总的log_count
+     *
+     */
     val class_detail = get_class_total(data_14cols, total_log_count, params.topn_dpt, sc)
 //    class_detail._1.saveAsTextFile(class_total)
 //    class_detail._2.saveAsTextFile(class_top10)
 
 //    logger.info(s"step_3_11 data_simplified write: ${data_simplified}")
     HadoopOpsUtil.removeDir(params.data_simplified_output_path, params.data_simplified_output_path)
+    /**
+     * uid
+     * sldat
+     * user_id
+     * item_id
+     * dptno
+     * qty
+     * amt
+     *
+     */
+    // TODO: in_basket_pos: 商品在购物篮内的顺序。   in_user_pos: 用户购买物品的一个全局排序编号
     val data_simplified_rdd = get_data_simplified(data_14cols)
 //    data_simplified_rdd.map(tupleToString(_, "|")).saveAsTextFile(data_simplified)
     data_14cols.unpersist()
@@ -159,14 +201,34 @@ object MilestoneData {
 
     //以下计算全部用hasVIPNO的数据
 //    logger.info(s"step_3_21 user_baskets_has_item_list write ${user_baskets_has_item_list}")
+    /**
+     * user_id
+     * item_id
+     * basket_list
+     */
     val user_basket_items = get_user_baskets_has_item_list(data_14cols_1)
 //    user_basket_items.saveAsTextFile(user_baskets_has_item_list)
 
 //    logger.info("step_3_22 user_basket_money: ", user_basket_money)
+    /**
+     * user_id
+     * uid
+     * sldat
+     * basket_money : 该单的总消费额
+     * basket_size :  该单包含的商品个数
+     */
     val user_basket_money_rdd = get_user_basket_money(data_14cols_1)
 //    user_basket_money_rdd.saveAsTextFile(user_basket_money)
 
 //    logger.info(s"step_3_23 user_total save: ${user_total}")
+    /**
+     * user_id
+     * first_order_time : 首单日期
+     * log_count ：  商品记录数
+     * item_count ： 独立商品总数
+     * basket_count ： 交易回合总数
+     * money ： 交易额总数
+     */
     val user_total_rdd = get_user_total(data_14cols_1)
 //    user_total_rdd.saveAsTextFile(user_total)
 
@@ -439,6 +501,7 @@ object MilestoneData {
     data_simplified_rdd
   }
 
+  // TODO: 可以优化
   def get_user_baskets_has_item_list(data_14cols_1: RDD[(String, String, String, String,
     String, String, String, String)]): RDD[(String)] = {
 

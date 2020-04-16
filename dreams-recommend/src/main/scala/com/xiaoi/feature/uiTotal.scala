@@ -3,6 +3,7 @@ package com.xiaoi.feature
 import com.xiaoi.common.{HadoopOpsUtil, StatsUtil}
 import org.apache.log4j.{Level, Logger}
 import org.apache.spark.rdd.RDD
+import org.apache.spark.sql.SparkSession
 import org.apache.spark.{SparkConf, SparkContext}
 import org.slf4j.LoggerFactory
 import scopt.OptionParser
@@ -18,29 +19,66 @@ object uiTotal {
   Logger.getLogger("org").setLevel(Level.ERROR)
 
   def run(params: Params): Unit = {
-    val conf = new SparkConf().setAppName("step_5_1to3 or uiTotal")
-    val sc = new SparkContext(conf)
+
+
+    val sparkSession: SparkSession = SparkSession.builder()
+      .appName("uiTotal")
+      .master("local[*]")
+      .getOrCreate()
+    val sc: SparkContext = sparkSession.sparkContext
+
     HadoopOpsUtil.removeDir(params.ui_total_output_path, params.ui_total_output_path)
     HadoopOpsUtil.removeDir(params.ui_money_total_output_path, params.ui_money_total_output_path)
     HadoopOpsUtil.removeDir(params.ui_cooccur_size_sta_output_path,
       params.ui_cooccur_size_sta_output_path)
 
     //uid, sldat, user_id，item_id，dptno, qty, amt
+    // 准备数据， data_simplified
     val data_simplified = get_data_simplified(params.data_simplified_input_path, sc)
     data_simplified.cache()
 
     //user_id, first_order_time, log_count, item_count, basket_count, money
+    // 准备数据， user_total
     val user_total = get_user_total(params.user_total_input_path, sc)
 
     logger.info(s"ui_total write: ${params.ui_total_output_path}")
+    // step_5_1
+    /**
+     *
+     * user_id
+     * item_id
+     * total_logs
+     * total_logs_ratio
+     * total_sessions
+     * total_session_ratio
+     *
+     */
     val ui_total = get_ui_total(data_simplified, user_total)
     ui_total.saveAsTextFile(params.ui_total_output_path)
 
     logger.info("ui_money_total data write...")
+    // step_5_2
+    /**
+     * user_id
+     * item_id
+     * total_money
+     * total_money_rank_percent
+     * avg_price_rank_percent
+     */
     val ui_money_total = get_ui_money_total(data_simplified)
     ui_money_total.saveAsTextFile(params.ui_money_total_output_path)
 
     logger.info("ui_cooccur_size_sta data write...")
+    //step_5_3
+    /**
+     * user_id
+     * item_id
+     * min
+     * max
+     * median
+     * avg
+     * std
+     */
     val ui_cooccur_size_sta = get_ui_basket_log_count(data_simplified)
     ui_cooccur_size_sta.saveAsTextFile(params.ui_cooccur_size_sta_output_path)
 

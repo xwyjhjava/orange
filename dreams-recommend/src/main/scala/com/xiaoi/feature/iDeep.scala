@@ -4,7 +4,7 @@ import com.xiaoi.common.{DateUtil, HadoopOpsUtil, StatsUtil}
 import com.xiaoi.common.StrUtil.tupleToString
 import com.xiaoi.conf.ConfigurationManager
 import com.xiaoi.constant.Constants
-import com.xiaoi.spark.etl.milestoneData
+import com.xiaoi.etl.MilestoneData
 import org.apache.log4j.{Level, Logger}
 import org.apache.spark.rdd.RDD
 import org.apache.spark.{SparkConf, SparkContext}
@@ -50,8 +50,8 @@ object iDeep {
     itemSaleUp.saveAsTextFile(params.i_sale_up_output_path)
 
     logger.info("step_6_6  i_time_dow_top_N ")
-    val data_14cols_1 = milestoneData.read_data_14cols(sc, params.data_14cols_1)
-    val data_14cols_2 = milestoneData.read_data_14cols(sc, params.data_14cols_2)
+    val data_14cols_1 = MilestoneData.read_data_14cols(sc, params.data_14cols_1)
+    val data_14cols_2 = MilestoneData.read_data_14cols(sc, params.data_14cols_2)
     val data_14cols = data_14cols_1.union(data_14cols_2)
     val dowTopN = get_i_time_topN(data_14cols, params.topn_entropy)
     dowTopN.saveAsTextFile(params.i_time_dow_top_N_output_path)

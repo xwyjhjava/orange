@@ -2,17 +2,20 @@ package com.xiaoi.etl
 
 import java.sql.Timestamp
 
+import com.mongodb.spark.config.WriteConfig
+import com.xiaoi.util.MongoUtil.mongoDBConn
 import org.apache.log4j.{Level, Logger}
 import org.apache.spark.SparkContext
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.{DataFrame, Dataset, Row, SaveMode, SparkSession}
+import org.bson.Document
 
 /**
  * @Package com.xiaoi.eda
  * @author ming
  * @date 2020/3/17 13:35
  * @version V1.0
- * @description data  etl , 原则上一份数据只需运行一次
+ * @description data  etl , 原则上一份数据只需运行一次。将user、item基础数据入到mongo
  */
 class Etl {
 
@@ -126,6 +129,65 @@ object Etl{
       val amt: String = ele._11
       (uid, orderDate, userId, itemId, qty, amt)
     })
+
+    import com.mongodb.spark._
+
+    //save user to mongo
+    val writeConfig_for_user = WriteConfig(Map(
+      "uri" -> "mongodb://meizu:Xi_aoi157=@122.226.240.157:20191/recommend",
+      "collection" -> "user_profile"
+    ))
+
+
+    //(userId, gender, birthday, creteDate)
+    userInfoRDD.map(user => {
+
+      val user_id: String = user._1
+      val gender: String = user._2
+      val birthday: String = user._3
+      val vip_created_date: String = user._4
+
+      val doc = new Document()
+      doc.put("user_id", user_id)
+      doc.put("gender", gender)
+      doc.put("birthday", birthday)
+      doc.put("vip_created_date", vip_created_date)
+
+      doc
+    })
+      .saveToMongoDB(writeConfig_for_user)
+
+
+
+
+
+    //save item to mongo
+    val writeConfig_for_item = WriteConfig(Map(
+      "uri" -> "mongodb://meizu:Xi_aoi157=@122.226.240.157:20191/recommend",
+      "collection" -> "item_profile"
+    ))
+
+    // (itemId, itemName, dptNo, dptName, bandNo, bandName)
+    itemInfoRDD.map(item => {
+      val item_id: String = item._1
+      val itemName: String = item._2
+      val dptNo: String = item._3
+      val dptName: String = item._4
+      val bandNo: String = item._5
+      val bandName: String = item._6
+
+      val doc = new Document()
+      doc.put("item_id", item_id)
+      doc.put("itemName", itemName)
+      doc.put("dptNo", dptNo)
+      doc.put("dptName", dptName)
+      doc.put("bandNo", bandNo)
+      doc.put("bandName", bandName)
+      doc
+    })
+      .saveToMongoDB(writeConfig_for_item)
+
+
 
     import spark.implicits._
     // save userInfo

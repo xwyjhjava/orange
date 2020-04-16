@@ -33,34 +33,80 @@ object uiReorder {
       params.ui_reorder_time_dow_output_path)
 
     //user_id，item_id，basket_list
+    // 准备数据  user_basket_has_item_list
     val user_baskets_has_item_list = get_user_baskets_items(
       params.user_baskets_has_item_list_input_path, sc)
 
     //uid, sldat, user_id，item_id，dptno, qty, amt
+    // 准备数据  data_simplified
     val data_simplified = get_data_simplified(
       params.data_simplified_input_path, sc)
     data_simplified.cache()
 
+    // step_5_5 ui_reorder
     logger.info("ui_reorder_count write...")
+    /**
+     * user_id
+     * item_id
+     * count
+     */
     val ui_reorder_count = user_baskets_has_item_list._1
     ui_reorder_count.repartition(1).saveAsTextFile(params.ui_reorder_count_output_path)
 
     logger.info("ui_reorder_ratio write...")
+    /**
+     * user_id
+     * item_id
+     * ratio
+     */
     val ui_reorder_ratio = user_baskets_has_item_list._2
     ui_reorder_ratio.repartition(1).saveAsTextFile(params.ui_reorder_ratio_output_path)
 
+
+
     val ui_reorder_time = get_ui_reorder_time(data_simplified)
     logger.info("ui_reorder_days_between_orders_sta data...")
+    /**
+     * user_id
+     * item_id
+     * min
+     * max
+     * median
+     * avg
+     * std
+     */
     val ui_reorder_days_between_orders_sta = ui_reorder_time._1
     ui_reorder_days_between_orders_sta.repartition(1)
       .saveAsTextFile(params.ui_reorder_days_between_orders_sta_output_path)
 
     logger.info("ui_reorder_time_dow write...")
+    /**
+     * user_id
+     * item_id
+     * dow1
+     * dow2
+     * dow3
+     * dow4
+     * dow5
+     * dow6
+     * dow7
+     *
+     */
     val ui_reorder_time_dow = ui_reorder_time._2
     ui_reorder_time_dow.repartition(1)
       .saveAsTextFile(params.ui_reorder_time_dow_output_path)
 
     logger.info("ui_reorder_orders_between_orders_sta write...")
+    /**
+     * user_id
+     * item_id
+     * min
+     * max
+     * median
+     * avg
+     * std
+     *
+     */
     val ui_reorder_orders_between_orders_sta = get_between_orders_sta(data_simplified)
     ui_reorder_orders_between_orders_sta.repartition(1)
       .saveAsTextFile(params.ui_reorder_orders_between_orders_sta_output_path)

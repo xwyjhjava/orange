@@ -5,6 +5,7 @@ import com.xiaoi.conf.ConfigurationManager
 import com.xiaoi.constant.Constants
 import org.apache.log4j.{Level, Logger}
 import org.apache.spark.rdd.RDD
+import org.apache.spark.sql.SparkSession
 import org.apache.spark.{SparkConf, SparkContext}
 import org.slf4j.LoggerFactory
 import scopt.OptionParser
@@ -20,13 +21,21 @@ object uTime {
   Logger.getLogger("org").setLevel(Level.ERROR)
 
   def run(params: Params): Unit = {
-    val conf = new SparkConf().setAppName("step_5_24 or uTime")
-    val sc = new SparkContext(conf)
+
+    val sparkSession: SparkSession = SparkSession.builder()
+      .appName("step_5_24 or uTime")
+      .master("local[*]")
+      .getOrCreate()
+    val sc: SparkContext = sparkSession.sparkContext
+
+
+
     HadoopOpsUtil.removeDir(params.u_order_days_ratio_output_path, params.u_order_days_ratio_output_path)
     HadoopOpsUtil.removeDir(params.u_time_hour_slot_ratio_output_path, params.u_time_hour_slot_ratio_output_path)
     HadoopOpsUtil.removeDir(params.u_time_dow_ratio_output_path, params.u_time_dow_ratio_output_path)
     HadoopOpsUtil.removeDir(params.u_time_workday_ratio_output_path, params.u_time_workday_ratio_output_path)
 
+    //step_5_24
     logger.info("u_order_days_ratio: 字段： user_id, ratio")
     val u_order_days_ratio = get_order_days_ratio(sc, params.data_14cols_1_input_path,
       params.observe_time_enabled,params.observe_time)
