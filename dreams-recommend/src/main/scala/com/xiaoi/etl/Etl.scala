@@ -140,7 +140,10 @@ object Etl{
 
 
     //(userId, gender, birthday, creteDate)
-    userInfoRDD.map(user => {
+    println("userInfo_count", userInfoRDD.count())
+    println("userInfo_count_distinct", userInfoRDD.distinct().count())
+
+    userInfoRDD.distinct().map(user => {
 
       val user_id: String = user._1
       val gender: String = user._2
@@ -168,7 +171,9 @@ object Etl{
     ))
 
     // (itemId, itemName, dptNo, dptName, bandNo, bandName)
-    itemInfoRDD.map(item => {
+    println("itemCount", itemInfoRDD.count())
+    println("itemCount_distinct", itemInfoRDD.distinct().count())
+    itemInfoRDD.distinct().map(item => {
       val item_id: String = item._1
       val itemName: String = item._2
       val dptNo: String = item._3

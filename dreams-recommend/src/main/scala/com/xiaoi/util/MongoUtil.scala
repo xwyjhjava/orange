@@ -1,13 +1,16 @@
 package com.xiaoi.util
 
+import java.util
+
+import com.mongodb.MongoClient
+import com.mongodb.bulk.BulkWriteResult
+import com.mongodb.client.MongoCollection
+import com.mongodb.client.model.UpdateOneModel
 import com.mongodb.spark._
 import com.mongodb.spark.config.WriteConfig
+import com.xiaoi.conf.ConfigurationManager
 import org.apache.spark.rdd.RDD
 import org.bson.Document
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.google.gson.Gson
-import com.mongodb.{BasicDBObject, MongoClient}
-import com.mongodb.client.{FindIterable, MongoCollection, MongoCursor}
 
 /**
  * @Package com.xiaoi.util
@@ -29,6 +32,35 @@ object MongoUtil {
     (mongoClient, collection)
 
   }
+
+  def saveLabelResultToMongo(labelRDD: RDD[(Integer, String)], labelName: String): Unit ={
+
+  }
+
+  def getMongoDBConnInstance(mongoColName: String) ={
+//    val mongoDBName = ConfigurationManager.getString("mongoDBName")
+//    val mongoUser = ConfigurationManager.getString("mongoUser")
+//    val mongoPwd = ConfigurationManager.getString("mongoPwd")
+//    val mongoIp = ConfigurationManager.getString("mongoIp")
+
+
+    val mongoDBName = "recommend"
+    val mongoUser = "meizu"
+    val mongoPwd = "Xi_aoi157="
+    val mongoIp = "122.226.240.157:20191"
+
+    val mongoUriStr = s"mongodb://${mongoUser}:${mongoPwd}@${mongoIp}/${mongoDBName}"
+    println(mongoUriStr)
+    val (client, collection) = mongoDBConn(mongoUriStr, mongoDBName, mongoColName)
+    (client, collection)
+
+
+  }
+
+
+
+
+
 
 
 

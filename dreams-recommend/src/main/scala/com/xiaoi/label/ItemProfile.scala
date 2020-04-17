@@ -16,6 +16,8 @@ object ItemProfile {
 
   private def run(): Unit ={
 
+    //加载交易属性
+
 
 
 

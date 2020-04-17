@@ -135,8 +135,7 @@ class ItemLabel(private val spark: SparkSession) extends Serializable {
    * @description 将标签存到mongo中
    *
    */
-  def saveLabelResultToMongo(labelRDD: RDD[(Integer, String)], labelName: String): Unit ={
-
+  private def saveLabelResultToMongo(labelRDD: RDD[(Integer, String)], labelName: String): Unit ={
 
     val bulkArray = new util.ArrayList[UpdateOneModel[Document]]()
 
