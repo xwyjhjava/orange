@@ -3,7 +3,7 @@ package com.dreams.spark
 import java.util.logging.Level
 
 import org.apache.spark.rdd.RDD
-import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql.{DataFrame, SparkSession}
 
 import scala.util.Random
 
@@ -40,6 +40,7 @@ object WordCount {
 //    rdd.flatMap(x => List((x._1, x._2 + 1)))
 //      .foreach(println)
 //    println("===========================")
+
 
 
     val random = new Random()

@@ -138,11 +138,7 @@ object Etl{
       "collection" -> "user_profile"
     ))
 
-
     //(userId, gender, birthday, creteDate)
-    println("userInfo_count", userInfoRDD.count())
-    println("userInfo_count_distinct", userInfoRDD.distinct().count())
-
     userInfoRDD.distinct().map(user => {
 
       val user_id: String = user._1
@@ -158,9 +154,7 @@ object Etl{
 
       doc
     })
-      .saveToMongoDB(writeConfig_for_user)
-
-
+//      .saveToMongoDB(writeConfig_for_user)
 
 
 
@@ -171,8 +165,6 @@ object Etl{
     ))
 
     // (itemId, itemName, dptNo, dptName, bandNo, bandName)
-    println("itemCount", itemInfoRDD.count())
-    println("itemCount_distinct", itemInfoRDD.distinct().count())
     itemInfoRDD.distinct().map(item => {
       val item_id: String = item._1
       val itemName: String = item._2
@@ -190,7 +182,36 @@ object Etl{
       doc.put("bandName", bandName)
       doc
     })
-      .saveToMongoDB(writeConfig_for_item)
+//      .saveToMongoDB(writeConfig_for_item)
+
+
+
+    // save action to mongo
+    val writeConfig_for_action = WriteConfig(Map(
+      "uri" -> "mongodb://meizu:Xi_aoi157=@122.226.240.157:20191/recommend",
+      "collection" -> "ui_action"
+    ))
+
+//    (uid, orderDate, userId, itemId, qty, amt)
+    actionRDD.map(ac => {
+      val uid: String = ac._1
+      val orderDate: String = ac._2
+      val userId: String = ac._3
+      val itemId: String = ac._4
+      val qty: String = ac._5
+      val amt: String = ac._6
+
+      val doc = new Document()
+      doc.put("uid", uid)
+      doc.put("order_date", orderDate)
+      doc.put("user_id", userId)
+      doc.put("item_id", itemId)
+      doc.put("qty", qty)
+      doc.put("amt", amt)
+
+      doc
+    })
+      .saveToMongoDB(writeConfig_for_action)
 
 
 

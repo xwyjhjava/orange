@@ -1,20 +1,8 @@
 package com.xiaoi.label
 
-import java.util
-
-import com.mongodb.{BasicDBObject, MongoClient}
-import com.mongodb.bulk.BulkWriteResult
-import com.mongodb.client.MongoCollection
-import com.mongodb.client.model.UpdateOneModel
-import com.mongodb.spark.MongoSpark
-import com.mongodb.spark.config.WriteConfig
-import com.xiaoi.util.MongoUtil
-import org.apache.log4j.{Level, Logger}
 import org.apache.spark.SparkContext
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.{DataFrame, SparkSession}
-import org.bson.Document
-import org.joda.time.DateTimeUtils
 
 import scala.collection.mutable.ListBuffer
 
@@ -88,12 +76,6 @@ object ItemAttribute {
         rest.iterator
       })
 
-
-    itemAttrRDD.toDF("item_id", "log_count", "first_order_datetime", "user_count", "session_count", "money")
-      .write
-      .option("header", true)
-      .option("inferSchema", true)
-      .csv()
 
   }
 
