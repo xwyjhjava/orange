@@ -2,7 +2,7 @@ package com.dreams.test
 
 import org.apache.spark.{SparkConf, SparkContext}
 import org.apache.spark.rdd.RDD
-import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql.{DataFrame, SaveMode, SparkSession}
 import org.junit.Test
 
 import scala.collection.mutable
@@ -22,7 +22,7 @@ object TestMainScala {
 //    run01()
 //      testReadFile()
 //    saveCsvFile()
-    randomTest()
+    contextSaveTest()
   }
 
   def run01(): Unit ={
@@ -115,6 +115,52 @@ object TestMainScala {
     })
 
     new_rdd.foreach(println)
+
+  }
+
+
+  def contextSaveTest(): Unit ={
+
+
+    val PATH = "D:\\data\\bgic\\result.csv"
+
+    val spark = SparkSession.builder()
+      .appName("save file")
+      .master("local[*]")
+      .getOrCreate()
+
+    import spark.sqlContext.implicits._
+
+    val sc: SparkContext = spark.sparkContext
+//    val dataRDD: RDD[(String, String)] = sc.textFile("D:\\pyworkspace\\bank\\bgic\\result.txt")
+//      .map(_.split("\\|"))
+//      .filter(_.length > 1)
+//      .map(arr => {
+//        val text: String = arr(0)
+//        val link: String = arr(1)
+//        (text, link)
+//      })
+
+//    dataRDD.repartition(1).saveAsTextFile(PATH)
+
+//    val dataFrame: DataFrame = dataRDD.toDF("name", "link")
+//    dataFrame.coalesce(1).write
+//      .mode(SaveMode.Overwrite)
+//      .csv(PATH)
+
+
+
+//    dataFrame.coalesce(1).write
+//      .option("header", true)
+//      .csv("D:\\data\\bgic\\result.csv")
+
+
+    val frame: DataFrame = spark.read.option("header", true)
+      .csv(PATH)
+
+    frame.show()
+
+
 
   }
 
