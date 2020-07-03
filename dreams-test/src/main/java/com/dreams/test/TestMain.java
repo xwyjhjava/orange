@@ -70,8 +70,6 @@ public class TestMain {
 
         try {
 
-
-
             String ip = "192.168.199.168";
             SocketAddress socketAddress = new InetSocketAddress(ip, 8000);
 
@@ -103,15 +101,28 @@ public class TestMain {
 
 
 
-            ByteBuffer data = ByteBuffer.wrap(new byte[1024]);
+            ByteBuffer data = ByteBuffer.wrap(new byte[2048]);
 
-            int index = 0;
+            int index;
             int count = 0;
+
             while ((index = socketChannel.read(data)) != -1){
                 count ++;
 
-                String s = new String(data.array());
-                System.out.println("data = " + s);
+
+//                System.out.println("index = " + index);
+//                data.get(buff, 0, index);
+//                String s = new String(buff, 0, index, "UTF-8");
+//                System.out.println("data = " + s);
+
+
+                data.flip();
+                while (data.remaining() > 0){
+                    System.out.println("data.get() = " + new String());
+                }
+                data.clear();
+
+
 
                 if(count == 10){
                     break;
