@@ -25,7 +25,7 @@ class BankEntity{
                     // 行业类别
                     COR_TYPE : Int,
                     // 岗位
-                    TIT_NAME : String,
+//                    TIT_NAME : String,
                     // 职业等级
                     CC_COD : Int,
                     // 职称
@@ -33,9 +33,9 @@ class BankEntity{
                     // 学历
                     EDU: Int,
                     // 主地址标识
-                    ADR_ID: Int,
+                    ADR_ID: String,
                     // 卡人主地址城市代码
-                    CIT_COD: Int,
+                    CIT_COD: String,
                     // 收入
                     INC : Float,
                     // 婚姻状况
@@ -47,9 +47,9 @@ class BankEntity{
                     // 现住房屋状况
                     HOS_STS : Int,
                     // 进件身份
-                    APP_INC_COD : Int,
+                    APP_INC_COD : Int
                     // 最新申请书时间
-                    APP_DATE: String
+//                    APP_DATE: String
 
                     )
 
@@ -59,7 +59,7 @@ class BankEntity{
                      // 客户号
                      NBR : String,
                      // 卡人账单城市
-                     BILL_CITY: String,
+//                     BILL_CITY: String,
                      // 电话营销成交日期
                      SALE_DATE : String,
                      // 保险公司代码
@@ -73,7 +73,7 @@ class BankEntity{
                      // 保额(万元)
                      COVERAGE: Float,
                      // 是否免费险
-                     FREE_FLAG : String,
+//                     FREE_FLAG : String,
                      // 保险时长单位
                      INSURE_TERM_TY: Int,
                      // 保险时长数值
