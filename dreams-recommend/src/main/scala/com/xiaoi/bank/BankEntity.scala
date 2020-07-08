@@ -7,7 +7,7 @@ package com.xiaoi.bank
  * @version V1.0
  * @description TODO
  */
-class BankEntity{
+object BankEntity{
 
 
   // 用户表

@@ -3,7 +3,17 @@ package com.xiaoi.bank
 import java.time.{Duration, LocalDate, Period}
 import java.util.UUID
 
+import org.apache.log4j.{Level, Logger}
+import org.apache.spark.SparkContext
+import org.apache.spark.rdd.RDD
+import org.apache.spark.sql.{DataFrame, SQLContext, SaveMode, SparkSession}
+import org.slf4j.LoggerFactory
+
+import scala.collection.mutable.ListBuffer
 import scala.util.Random
+import java.util
+
+import org.apache.spark.sql.types.StructType
 
 /**
  * @Package com.xiaoi.bank
@@ -13,6 +23,8 @@ import scala.util.Random
  * @description 创建模拟数据
  */
 class MockData {
+
+//  private val LOGGER = LoggerFactory.getILoggerFactory.getLogger(MockData.getClass.getName)
 
 
   private val random = new Random()
@@ -33,6 +45,11 @@ class MockData {
 
   // 产品类型
   private val PROD_TYPE_ARRAY = Array("长期险", "短期险", "极短险")
+
+  // 被保人和投保人关系
+  private val PAYED_SAME_F_ARRAY = Array("两者相同", "两者不同")
+
+
 
 
 
@@ -314,60 +331,22 @@ class MockData {
 
 
   /**
-   * 生成保额
+   *
+   * 生成时长、缴费数据
    * @return
    */
-  def getCOVERAGE(): Float ={
+  def getTermAndFee(): Array[Float] ={
 
-    1.0.toFloat
+    // 每期保费 [10, 999)
+    val permFee: Float = (random.nextInt(1000) + 10).toFloat
+    // 缴费时长, 单位是年
+    val meth: Int = random.nextInt(12) + 1
+    // 本年度保费金额
+    val yearFee: Float = permFee * 12
+    // 总保费
+    val totalFee: Float = yearFee * meth
 
-  }
-
-
-  /**
-   * 生成保险时长单位
-   * @return
-   */
-  def getTERMTY(): Int ={
-
-    val termTY: Int = random.nextInt(3) + 1
-    termTY
-
-  }
-
-  /**
-   * todo
-   * 生成保险时长数值
-   * @return
-   */
-  def getTERM(): Int ={
-
-    val term: Int = random.nextInt(13)
-    term
-
-  }
-
-  /**
-   * 生成缴费时长单位
-   * @return
-   */
-  def getMETHOD(): Int ={
-
-    val method: Int = random.nextInt(3) + 1
-    method
-
-  }
-
-
-  /**
-   * todo
-   * 生成缴费时长数值
-   * @return
-   */
-  def getMETHODTERM(): Int ={
-
-    val term: Int = random.nextInt(13)
-    term
+    Array(permFee, meth, yearFee, totalFee)
 
   }
 
@@ -383,24 +362,28 @@ class MockData {
 
   }
 
-  // TODO: 每期保费
 
+  /**
+   * 生成被保人和投保人关系
+   * @return
+   */
+  def getPAYEDSAME(): String ={
 
+    val index: Int = random.nextInt(2)
+    PAYED_SAME_F_ARRAY(index)
 
+  }
 
+  /**
+   * 生成被保人年龄
+   * @return
+   */
+  def getINSUREAGE(): Int ={
 
+    val age: Int = random.nextInt(61)
+    age
 
-
-
-
-
-
-
-
-
-
-
-
+  }
 
 
 }
@@ -408,19 +391,132 @@ class MockData {
 
 object MockData{
 
+  Logger.getLogger("org").setLevel(Level.OFF)
+  Logger.getLogger("com").setLevel(Level.OFF)
+
+  private val LOGGER = LoggerFactory.getILoggerFactory.getLogger(MockData.getClass.getName)
+
+
+
+
   def main(args: Array[String]): Unit = {
 
+    // spark初始化
+    val sparkSession: SparkSession = SparkSession.builder()
+      .appName("mock data")
+      .master("local[*]")
+      .getOrCreate()
+
+    val sparkContext: SparkContext = sparkSession.sparkContext
+    val sqlContext: SQLContext = sparkSession.sqlContext
+
+    // 初始化
     val data = new MockData()
 
-    println(data.getNBR())
+
+    val list = new util.ArrayList[UserSchema]()
+
+    var i = 0
+    for(i <- 0 to 1000000) {
+
+      val user = new UserSchema()
+
+      //编号
+      val nbr: String = data.getNBR()
+      //年龄
+      val age: Int = data.getAGE()
+      //性别
+      val sex: Int = data.getSEX()
+      //国籍
+      val nationality: Int = data.getCITYID()
+      //民族
+      val ethnic: Int = data.getETHGRP()
+      //行业类别
+      val industry: Int = data.getCORTYPE()
+      //职业等级
+      val jobClass: Int = data.getCCCODE()
+      //职称
+      val jobTitle: Int = data.getOCCODE()
+      //学历
+      val education: Int = data.getEDU()
+      //主地址标识
+      val address: String = data.getADRID()
+      //卡人主地址城市代码
+      val cityCode: String = data.getCITCODE()
+      //收入
+      val income: Float = data.getINC()
+      //婚姻状况
+      val marriage: Int = data.getMARSTS()
+      //有无子女
+      val child: Int = data.getCHILDFLG()
+      //车辆状况
+      val vehicle: String = data.getVEHFLG()
+      //现住房屋状况
+      val house: Int = data.getHOS()
+      //进件身份
+      val appCode: Int = data.getAPPCODE()
 
 
-    var a = 0;
-    for (a <- 1 to 20){
-      println(data.getSALEDATE())
+
+      user.setNBR(nbr)
+      user.setSEX(sex)
+      user.setAGE(age)
+      user.setCITY_ID(nationality)
+      user.setETH_GRP(ethnic)
+      user.setCOR_TYPE(industry)
+      user.setCC_COD(jobClass)
+      user.setOC_COD(jobTitle)
+      user.setEDU(education)
+      user.setADR_ID(address)
+      user.setCIT_COD(cityCode)
+      user.setINC(income)
+      user.setMAR_STS(marriage)
+      user.setCHILD_FLAG(child)
+      user.setVEH_FLG(vehicle)
+      user.setHOS_STS(house)
+      user.setAPP_INC_COD(appCode)
+
+      list.add(user)
+
+
+//      list.add(nbr.toString)
+//      list.add(age.toString)
+//      list.add(sex.toString)
+//      list.add(nationality.toString)
+//      list.add(ethnic.toString)
+//      list.add(industry.toString)
+//      list.add(jobClass.toString)
+//      list.add(jobTitle.toString)
+//      list.add(education.toString)
+//      list.add(address.toString)
+//      list.add(cityCode.toString)
+//      list.add(income.toString)
+//      list.add(marriage.toString)
+//      list.add(child.toString)
+//      list.add(vehicle.toString)
+//      list.add(house.toString)
+//      list.add(appCode.toString)
+
+
     }
+
+    val userDF: DataFrame = sparkSession.createDataFrame(list, classOf[UserSchema])
+    userDF.show()
+
+    userDF.write
+      .option("header", true)
+      .mode(SaveMode.Overwrite)
+      .parquet("D:\\data\\cmb\\user")
+
+    println("save success")
+
+//    userDF.show()
 
 
 
   }
+
+
+
+
 }
