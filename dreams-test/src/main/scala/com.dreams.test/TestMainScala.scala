@@ -132,27 +132,27 @@ object TestMainScala {
     import spark.sqlContext.implicits._
 
     val sc: SparkContext = spark.sparkContext
-//    val dataRDD: RDD[(String, String)] = sc.textFile("D:\\pyworkspace\\bank\\bgic\\result.txt")
-//      .map(_.split("\\|"))
-//      .filter(_.length > 1)
-//      .map(arr => {
-//        val text: String = arr(0)
-//        val link: String = arr(1)
-//        (text, link)
-//      })
+    val dataRDD: RDD[(String, String)] = sc.textFile("D:\\pyworkspace\\bank\\bgic\\result.txt")
+      .map(_.split("\\|"))
+      .filter(_.length > 1)
+      .map(arr => {
+        val text: String = arr(0)
+        val link: String = arr(1)
+        (text, link)
+      })
 
 //    dataRDD.repartition(1).saveAsTextFile(PATH)
 
-//    val dataFrame: DataFrame = dataRDD.toDF("name", "link")
+    val dataFrame: DataFrame = dataRDD.toDF("name", "link")
 //    dataFrame.coalesce(1).write
 //      .mode(SaveMode.Overwrite)
 //      .csv(PATH)
 
 
 
-//    dataFrame.coalesce(1).write
-//      .option("header", true)
-//      .csv("D:\\data\\bgic\\result.csv")
+    dataFrame.coalesce(1).write
+      .option("header", true)
+      .csv("D:\\data\\bgic\\result.csv")
 
 
     val frame: DataFrame = spark.read.option("header", true)

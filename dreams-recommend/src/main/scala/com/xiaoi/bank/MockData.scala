@@ -40,7 +40,7 @@ class MockData {
   // 车辆状况
   private val VEH_FLG_ARRAY = Array("Y", "N")
 
-  //产品号
+  //产品号 todo 补充和北部湾产品类型符合的
   private val PROD_NO_ARRAY = Array("001", "002", "003")
 
   // 产品类型
@@ -51,26 +51,6 @@ class MockData {
 
 
 
-
-
-
-
-
-
-
-  //mock user data
-  /**
-   *
-   * @param num 生产的数据条数
-   */
-  def mockUser(num: Long): Unit ={
-
-
-    // 用户号
-    getNBR()
-
-
-  }
 
   // ====================用户表数据生成=======================
 
@@ -345,8 +325,12 @@ class MockData {
     val yearFee: Float = permFee * 12
     // 总保费
     val totalFee: Float = yearFee * meth
+    //保额
+    val coverage: Float = (totalFee / 10000).formatted("%.2f").toFloat
+    //保险时长数值
+    val insuranceTerm : Int = meth + 10
 
-    Array(permFee, meth, yearFee, totalFee)
+    Array(coverage, insuranceTerm, permFee, meth, yearFee, totalFee)
 
   }
 
@@ -413,11 +397,123 @@ object MockData{
     // 初始化
     val data = new MockData()
 
+    //mock user data
+//    mockUserData(sparkSession, data)
+    //mock order data
+//    mockOrderData(sparkSession, data)
 
+
+    val orderDF: DataFrame = sparkSession.read.option("header", true)
+      .option("inferSchema", true)
+      .load("D:\\data\\cmb\\user")
+
+    orderDF.coalesce(1)
+      .write
+      .option("header", true)
+      .mode(SaveMode.Overwrite)
+      .csv("D:\\data\\cmb\\userCSV")
+
+    println("======done======")
+
+
+
+
+  }
+
+
+  /**
+   * 生成order数据
+   * @param sparkSession
+   * @param data
+   */
+  private def mockOrderData(sparkSession: SparkSession, data: MockData) = {
+    //read user data
+    val userDF: DataFrame = sparkSession.read
+      .option("header", true)
+      .option("inferSchema", true)
+      .load("D:\\data\\cmb\\user")
+
+    // 选择目标user
+    val nbrArray: Array[String] = userDF.select("NBR").take(10000)
+      .map(row => row.getAs[String]("NBR"))
+
+    val orderList = new util.ArrayList[OrderSchema]()
+
+
+    var i = 0
+    for (i <- 0 to 9999) {
+
+      val order = new OrderSchema()
+
+      val nbr: String = nbrArray(i)
+      val saleDate: String = data.getSALEDATE()
+      val merchCode: String = data.getMERCHCODE()
+      val merchName: String = data.getMERCHNAME()
+      val prodNo: String = data.getPRODNO()
+      val prodType: String = data.getTYPE()
+      val array: Array[Float] = data.getTermAndFee()
+
+      val coverage: Float = array(0)
+      val insuranceDurationUnit: Int = 1
+      val insuranceDurationValue: Int = array(1).toInt
+      val paymentDurationUnit: Int = 1
+      val paymentDurationValue: Int = array(3).toInt
+
+      val paymentType: Int = data.getPAYTPERQ()
+      val perFee: Float = array(2)
+      val yearFee: Float = array(4)
+      val totalFee: Float = array(5)
+
+      val payedSame: String = data.getPAYEDSAME()
+      val insureAge: Int = data.getINSUREAGE()
+
+
+      order.setNBR(nbr)
+      order.setSALE_DATE(saleDate)
+      order.setMERCH_COD(merchCode)
+      order.setMERCH_NAME(merchName)
+      order.setPROD_NO(prodNo)
+      order.setTYPE(prodType)
+      order.setCOVERAGE(coverage)
+      order.setINSURE_TERM_TY(insuranceDurationUnit)
+      order.setINSURE_TERM(insuranceDurationValue)
+      order.setMETHDD_TERM_TY(paymentDurationUnit)
+      order.setMETHDD_TERM(paymentDurationValue)
+      order.setPAYT_PERQ(paymentType)
+      order.setPERM_FEE(perFee)
+      order.setYEAR_FEE(yearFee)
+      order.setTOT_FEE(totalFee)
+      order.setPAYED_INSURED_SAME_F(payedSame)
+      order.setINSURE_AGE(insureAge)
+
+
+      orderList.add(order)
+
+    }
+
+
+    val orderDF: DataFrame = sparkSession.createDataFrame(orderList, classOf[OrderSchema])
+    orderDF.show()
+
+    orderDF.write
+      .option("header", true)
+      .mode(SaveMode.Overwrite)
+      .parquet("D:\\data\\cmb\\order")
+
+    println("===========done=========")
+  }
+
+  /**
+   * 生成用户数据
+ *
+   * @param sparkSession
+   * @param data
+   */
+  private def mockUserData(sparkSession: SparkSession, data: MockData) = {
     val list = new util.ArrayList[UserSchema]()
 
     var i = 0
-    for(i <- 0 to 1000000) {
+    for (i <- 0 to 1000000) {
 
       val user = new UserSchema()
 
@@ -457,7 +553,6 @@ object MockData{
       val appCode: Int = data.getAPPCODE()
 
 
-
       user.setNBR(nbr)
       user.setSEX(sex)
       user.setAGE(age)
@@ -478,26 +573,6 @@ object MockData{
 
       list.add(user)
 
-
-//      list.add(nbr.toString)
-//      list.add(age.toString)
-//      list.add(sex.toString)
-//      list.add(nationality.toString)
-//      list.add(ethnic.toString)
-//      list.add(industry.toString)
-//      list.add(jobClass.toString)
-//      list.add(jobTitle.toString)
-//      list.add(education.toString)
-//      list.add(address.toString)
-//      list.add(cityCode.toString)
-//      list.add(income.toString)
-//      list.add(marriage.toString)
-//      list.add(child.toString)
-//      list.add(vehicle.toString)
-//      list.add(house.toString)
-//      list.add(appCode.toString)
-
-
     }
 
     val userDF: DataFrame = sparkSession.createDataFrame(list, classOf[UserSchema])
@@ -509,14 +584,5 @@ object MockData{
       .parquet("D:\\data\\cmb\\user")
 
     println("save success")
-
-//    userDF.show()
-
-
-
   }
-
-
-
-
 }

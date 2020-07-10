@@ -91,7 +91,7 @@ object BankEntity{
                      // 总保费
                      TOT_FEE : Float,
                      // 累计已缴保费金额
-                     PAYED_PERM: Float,
+//                     PAYED_PERM: Float,
                      // 被保人和投保人关系
                      PAYED_INSURED_SAME_F : String,
                      // 被保人年龄
