@@ -40,8 +40,12 @@ class MockData {
   // 车辆状况
   private val VEH_FLG_ARRAY = Array("Y", "N")
 
-  //产品号 todo 补充和北部湾产品类型符合的
-  private val PROD_NO_ARRAY = Array("001", "002", "003")
+  //产品号
+  private val PROD_NO_ARRAY = Array(
+    "交强险", "商业车险", "企财险", "家财险",
+    "工程险", "责任险", "船舶险", "货运险",
+    "意外险", "农业险", "保证险", "健康险",
+    "特殊风险保险", "退货运费险", "汽车修理厂综合保险", "其他")
 
   // 产品类型
   private val PROD_TYPE_ARRAY = Array("长期险", "短期险", "极短险")
@@ -400,18 +404,23 @@ object MockData{
     //mock user data
 //    mockUserData(sparkSession, data)
     //mock order data
-//    mockOrderData(sparkSession, data)
+    mockOrderData(sparkSession, data)
 
 
     val orderDF: DataFrame = sparkSession.read.option("header", true)
       .option("inferSchema", true)
-      .load("D:\\data\\cmb\\user")
+      .load("D:\\data\\cmb\\order")
 
     orderDF.coalesce(1)
       .write
       .option("header", true)
       .mode(SaveMode.Overwrite)
-      .csv("D:\\data\\cmb\\userCSV")
+      .csv("D:\\data\\cmb\\orderCSV")
+
+
+//    sparkSession.read.option("header", true)
+//        .csv("D:\\data\\cmb\\orderCSV")
+
 
     println("======done======")
 
@@ -434,14 +443,14 @@ object MockData{
       .load("D:\\data\\cmb\\user")
 
     // 选择目标user
-    val nbrArray: Array[String] = userDF.select("NBR").take(10000)
+    val nbrArray: Array[String] = userDF.select("NBR").take(500000)
       .map(row => row.getAs[String]("NBR"))
 
     val orderList = new util.ArrayList[OrderSchema]()
 
 
     var i = 0
-    for (i <- 0 to 9999) {
+    for (i <- 0 to 499999) {
 
       val order = new OrderSchema()
 
