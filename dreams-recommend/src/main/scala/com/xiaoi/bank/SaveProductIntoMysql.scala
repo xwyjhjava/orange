@@ -80,7 +80,7 @@ object SaveProductIntoMysql {
     properties.setProperty("password", "root")
     properties.setProperty("driver", "com.mysql.cj.jdbc.Driver")
 
-    val url = "jdbc:mysql://172.16.20.23:3306/recommend_baoxian?useUnicode=true&characterEncoding=utf-8&serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true"
+    val url = "jdbc:mysql://172.16.20.11:3306/recommend_baoxian?useUnicode=true&characterEncoding=utf-8&serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true"
     val table = "insurance_product"
 
     nameDF.write.mode(SaveMode.Append)

@@ -296,7 +296,7 @@ class MockData {
    */
   def getPRODNO(): String ={
 
-    val index: Int = random.nextInt(3)
+    val index: Int = random.nextInt(16)
     PROD_NO_ARRAY(index)
 
   }
@@ -410,7 +410,7 @@ object MockData{
     val orderDF: DataFrame = sparkSession.read.option("header", true)
       .option("inferSchema", true)
       .load("D:\\data\\cmb\\order")
-
+//
     orderDF.coalesce(1)
       .write
       .option("header", true)
@@ -443,14 +443,14 @@ object MockData{
       .load("D:\\data\\cmb\\user")
 
     // 选择目标user
-    val nbrArray: Array[String] = userDF.select("NBR").take(500000)
+    val nbrArray: Array[String] = userDF.select("NBR").take(10000)
       .map(row => row.getAs[String]("NBR"))
 
     val orderList = new util.ArrayList[OrderSchema]()
 
 
     var i = 0
-    for (i <- 0 to 499999) {
+    for (i <- 0 to 9999) {
 
       val order = new OrderSchema()
 
@@ -519,12 +519,12 @@ object MockData{
    * @param data
    */
   private def mockUserData(sparkSession: SparkSession, data: MockData) = {
-    val list = new util.ArrayList[UserSchema]()
+    val list = new util.ArrayList[UserSchemaWithAllString]()
 
     var i = 0
-    for (i <- 0 to 1000000) {
+    for (i <- 0 to 10000) {
 
-      val user = new UserSchema()
+      val user = new UserSchemaWithAllString()
 
       //编号
       val nbr: String = data.getNBR()
@@ -563,34 +563,34 @@ object MockData{
 
 
       user.setNBR(nbr)
-      user.setSEX(sex)
-      user.setAGE(age)
-      user.setCITY_ID(nationality)
-      user.setETH_GRP(ethnic)
-      user.setCOR_TYPE(industry)
-      user.setCC_COD(jobClass)
-      user.setOC_COD(jobTitle)
-      user.setEDU(education)
+      user.setSEX(sex.toString)
+      user.setAGE(age.toString)
+      user.setCITY_ID(nationality.toString)
+      user.setETH_GRP(ethnic.toString)
+      user.setCOR_TYPE(industry.toString)
+      user.setCC_COD(jobClass.toString)
+      user.setOC_COD(jobTitle.toString)
+      user.setEDU(education.toString)
       user.setADR_ID(address)
       user.setCIT_COD(cityCode)
-      user.setINC(income)
-      user.setMAR_STS(marriage)
-      user.setCHILD_FLAG(child)
+      user.setINC(income.toString)
+      user.setMAR_STS(marriage.toString)
+      user.setCHILD_FLAG(child.toString)
       user.setVEH_FLG(vehicle)
-      user.setHOS_STS(house)
-      user.setAPP_INC_COD(appCode)
+      user.setHOS_STS(house.toString)
+      user.setAPP_INC_COD(appCode.toString)
 
       list.add(user)
 
     }
 
-    val userDF: DataFrame = sparkSession.createDataFrame(list, classOf[UserSchema])
+    val userDF: DataFrame = sparkSession.createDataFrame(list, classOf[UserSchemaWithAllString])
     userDF.show()
 
     userDF.write
       .option("header", true)
       .mode(SaveMode.Overwrite)
-      .parquet("D:\\data\\cmb\\user")
+      .parquet("D:\\data\\cmb\\userWithAllString")
 
     println("save success")
   }
