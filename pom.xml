@@ -18,6 +18,7 @@
         <module>dreams-recommend</module>
         <module>dreams-toutiao</module>
         <module>dreams-spark3.0</module>
+        <module>dreams-flink</module>
     </modules>
 
     <packaging>pom</packaging>

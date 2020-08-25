@@ -1,9 +1,9 @@
 package com.dreams.test
 
-import org.apache.spark.{SparkConf, SparkContext}
+import org.apache.log4j.{Level, Logger}
+import org.apache.spark.SparkContext
 import org.apache.spark.rdd.RDD
-import org.apache.spark.sql.{DataFrame, SaveMode, SparkSession}
-import org.junit.Test
+import org.apache.spark.sql.{DataFrame, Dataset, Row, SparkSession}
 
 import scala.collection.mutable
 import scala.io.{BufferedSource, Source}
@@ -18,11 +18,16 @@ import scala.util.Random
  */
 object TestMainScala {
 
+
+    Logger.getLogger("org").setLevel(Level.OFF)
+    Logger.getLogger("apache").setLevel(Level.OFF)
+
   def main(args: Array[String]): Unit = {
 //    run01()
 //      testReadFile()
 //    saveCsvFile()
-    contextSaveTest()
+//    contextSaveTest()
+    logDataCompare()
   }
 
   def run01(): Unit ={
@@ -31,7 +36,6 @@ object TestMainScala {
       .appName("run")
       .master("local[2]")
       .getOrCreate()
-    import spark.implicits._
     val sc: SparkContext = spark.sparkContext
     val chat_level: RDD[String] = sc.makeRDD(Seq("abc|2"))
     val chatInfo: mutable.Map[String, Int] = collection.mutable.Map("" -> 0)
@@ -160,6 +164,36 @@ object TestMainScala {
 
     frame.show()
 
+
+
+  }
+
+
+  def logDataCompare(): Unit ={
+
+    val sparkSession: SparkSession = SparkSession.builder()
+      .master("local[*]")
+      .appName("log data compare")
+      .getOrCreate()
+
+    val sc: SparkContext = sparkSession.sparkContext
+
+    import sparkSession.sqlContext.implicits._
+
+    val lessDataPath = "testfile\\log_data\\less\\23"
+    val moreDataPath = "testfile\\log_data\\more\\23"
+
+    val lessDF: DataFrame = sc.textFile(lessDataPath).map(_.split("\\|"))
+      .map(arr => (arr(1), arr(2)))
+      .toDF("sid", "uid")
+
+    val moreDF: DataFrame = sc.textFile(moreDataPath).map(_.split("\\|"))
+      .map(arr => (arr(1), arr(2)))
+      .toDF("sid", "uid")
+
+
+    val exceptDF: Dataset[Row] = moreDF.except(lessDF)
+    exceptDF.show()
 
 
   }

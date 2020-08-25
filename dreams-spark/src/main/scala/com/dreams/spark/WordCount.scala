@@ -53,7 +53,7 @@ object WordCount {
     new_rdd.foreach(println)
 
     val fileRDD: RDD[String] = sc.textFile("")
-    fileRDD.flatMap()
+//    fileRDD.flatMap()
 
 
 
