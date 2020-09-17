@@ -22,7 +22,7 @@ public class SelectSort extends AbstractSort {
 		}
 		System.out.println("\n");
 	}
-
+	
 	@Override
 	public void sort() {
 
@@ -47,28 +47,18 @@ public class SelectSort extends AbstractSort {
 
 	}
 
+	/**
+	 * 优化： 每一次找出最小值和最大值
+	 * 好处： 外层循环少一半
+	 */
+	public void sort2(){
 
-	public static void swap(int[] arr, int i, int j){
-		int tmp = arr[i];
-		arr[i] = arr[j];
-		arr[j] = tmp;
-
-	}
-
-
-	public static void main(String[] args) {
-		SelectSort selectSort = new SelectSort();
-//		selectSort.setup();
-//		selectSort.sort();
-
-
-//		TODO 一次找出最小值和最大值
 		int[] arr = {2, 3, 8, 9, 1};
-		for (int i = 0; i < arr.length - 1; i++) {
+		for (int i = 0; i < arr.length / 2 + 1; i++) {
 			// 最小值
 			int minPos = i;
 			int maxPos = i;
-			for (int j = i + 1; j < arr.length; j++) {
+			for (int j = i + 1; j < arr.length - i; j++) {
 				// 比较
 				minPos = arr[j] < arr[minPos] ? j : minPos;
 				maxPos = arr[j] > arr[maxPos] ? j : maxPos;
@@ -84,17 +74,26 @@ public class SelectSort extends AbstractSort {
 				System.out.print(arr[k] + " ");
 			}
 			System.out.println("\n");
-
-			i--;
 		}
 
 		for (int i = 0; i < arr.length; i++) {
-			System.out.println("i = " + arr[i]);
+			System.out.print("排序后： " + arr[i] + " ");
 		}
+	}
 
 
+	public static void swap(int[] arr, int i, int j){
+		int tmp = arr[i];
+		arr[i] = arr[j];
+		arr[j] = tmp;
+
+	}
 
 
+	public static void main(String[] args) {
+		SelectSort selectSort = new SelectSort();
+		selectSort.setup();
+		selectSort.sort();
 
 	}
 
