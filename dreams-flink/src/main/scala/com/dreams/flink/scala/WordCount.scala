@@ -1,5 +1,9 @@
 package com.dreams.flink.scala
 
+import org.apache.flink.api.java.tuple.Tuple
+import org.apache.flink.streaming.api.scala.{DataStream, KeyedStream, StreamExecutionEnvironment}
+import org.apache.flink.api.scala._
+
 /**
  * @Package com.dreams.flink
  * @author ming
@@ -8,5 +12,22 @@ package com.dreams.flink.scala
  * @description TODO
  */
 object WordCount {
+  def main(args: Array[String]): Unit = {
+
+    val env: StreamExecutionEnvironment = StreamExecutionEnvironment.getExecutionEnvironment
+    // 设置并行度
+    env.setParallelism(1)
+    //数据流
+    val initStream: DataStream[String] = env.socketTextStream("192.168.199.133", 8888)
+    val wordStream: DataStream[String] = initStream.flatMap(_.split(" "))
+    val pairStream: DataStream[(String, Int)] = wordStream.map((_, 1))
+    val keyByStream: KeyedStream[(String, Int), Tuple] = pairStream.keyBy(0)
+    val restStream: DataStream[(String, Int)] = keyByStream.sum(1)
+    restStream.print()
+
+    // 启动任务
+    env.execute("first word count job")
+
+  }
 
 }

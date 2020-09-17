@@ -29,3 +29,5 @@
 hs_err_pid*
 test
 target
+*/target
+dreams-flink/dependency-reduced-pom.xml

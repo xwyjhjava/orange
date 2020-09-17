@@ -3,7 +3,7 @@ package com.dreams.test
 import org.apache.log4j.{Level, Logger}
 import org.apache.spark.SparkContext
 import org.apache.spark.rdd.RDD
-import org.apache.spark.sql.{DataFrame, Dataset, Row, SparkSession}
+import org.apache.spark.sql.{DataFrame, Dataset, Row, SQLContext, SaveMode, SparkSession}
 
 import scala.collection.mutable
 import scala.io.{BufferedSource, Source}
@@ -27,7 +27,8 @@ object TestMainScala {
 //      testReadFile()
 //    saveCsvFile()
 //    contextSaveTest()
-    logDataCompare()
+//    logDataCompare()
+    isHit()
   }
 
   def run01(): Unit ={
@@ -194,6 +195,116 @@ object TestMainScala {
 
     val exceptDF: Dataset[Row] = moreDF.except(lessDF)
     exceptDF.show()
+
+
+  }
+
+  def tmpTest(): Unit ={
+
+    val sparkSession: SparkSession = SparkSession.builder()
+      .appName("test")
+      .master("local[*]")
+      .getOrCreate()
+
+
+    val sc: SparkContext = sparkSession.sparkContext
+
+    val baseRDD: RDD[Array[String]] = sc.textFile("").map(_.split("\\|"))
+
+    val array: Array[String] = baseRDD.map(arr => arr(3)).repartition(1).take(2000)
+    val top_100: RDD[String] = sc.makeRDD(array)
+
+    import sparkSession.sqlContext.implicits._
+    import org.apache.spark.sql.functions._
+
+
+    top_100.map(ele => ele)
+
+    top_100.toDF("aa").groupBy("aa")
+      .agg(
+        count("aa").as("count")
+      )
+
+  }
+
+
+  /**
+   * 将全量数据以2000为一组，划分数据集（tensorflow全量会报错, 所以需要进行分批处理）
+   */
+  def testSplitData(): Unit ={
+
+    val sparkSession: SparkSession = SparkSession.builder()
+      .appName("test")
+      .master("local[*]")
+      .getOrCreate()
+
+    val sc: SparkContext = sparkSession.sparkContext
+    val sqlContext: SQLContext = sparkSession.sqlContext
+
+    import sqlContext.implicits._
+
+    val baseRDD: RDD[Array[String]] = sc.textFile("file:///xiaoi/xx").map(_.split("\\|"))
+
+    val quesIndexRDD: RDD[((String, String), Long)] = baseRDD.map(arr => (arr(3), arr(arr.length - 1))).distinct().zipWithIndex()
+
+    // 验证数据条数
+    quesIndexRDD.count()
+
+    // 划分
+    quesIndexRDD.filter(ele => {ele._2 >=0 && ele._2 < 2000}).map(_._1._1).repartition(1).saveAsTextFile("file:///xiaoi/emotion_model/test_data/origin_data_12/part01")
+    quesIndexRDD.filter(ele => {ele._2 >=2000 && ele._2 < 4000}).map(_._1._1).repartition(1).saveAsTextFile("file:///xiaoi/emotion_model/test_data/origin_data_12/part02")
+    quesIndexRDD.filter(ele => {ele._2 >=4000 && ele._2 < 6000}).map(_._1._1).repartition(1).saveAsTextFile("file:///xiaoi/emotion_model/test_data/origin_data_12/part03")
+    quesIndexRDD.filter(ele => {ele._2 >=6000 && ele._2 < 8000}).map(_._1._1).repartition(1).saveAsTextFile("file:///xiaoi/emotion_model/test_data/origin_data_12/part04")
+    quesIndexRDD.filter(ele => {ele._2 >=8000 && ele._2 < 10000}).map(_._1._1).repartition(1).saveAsTextFile("file:///xiaoi/emotion_model/test_data/origin_data_12/part05")
+    quesIndexRDD.filter(ele => {ele._2 >=10000 && ele._2 < 12000}).map(_._1._1).repartition(1).saveAsTextFile("file:///xiaoi/emotion_model/test_data/origin_data_12/part06")
+    quesIndexRDD.filter(ele => {ele._2 >=12000}).map(_._1._1).repartition(1).saveAsTextFile("file:///xiaoi/emotion_model/test_data/origin_data_12/part07")
+
+
+
+    quesIndexRDD.filter(_._2 == 1999)
+
+
+  }
+
+  def isHit(): Unit ={
+
+    val sparkSession: SparkSession = SparkSession.builder()
+      .appName("test")
+      .master("local[*]")
+      .getOrCreate()
+
+    val sc: SparkContext = sparkSession.sparkContext
+    val sqlContext: SQLContext = sparkSession.sqlContext
+
+
+    val positiveArray: Array[String] = sc.textFile("E:\\xiaoi\\emotion_data\\positive.txt").collect()
+
+    val resultRDD: RDD[String] = sc.textFile("E:\\xiaoi\\emotion_data\\ques2score")
+      .map(_.split("\\|")).map(arr => arr(0))
+
+
+    positiveArray.take(5).foreach(println)
+
+    println("===========================")
+
+    resultRDD.take(5).foreach(println)
+
+
+    val hitRDD: RDD[String] = resultRDD.filter(e => {
+
+      for (elem <- positiveArray) {
+        if (e.contains(elem)) {
+          true
+        }
+      }
+      false
+    })
+
+    val count: Long = hitRDD.count()
+    println("count:" + count)
+
+    hitRDD.take(10).foreach(println)
+
 
 
   }

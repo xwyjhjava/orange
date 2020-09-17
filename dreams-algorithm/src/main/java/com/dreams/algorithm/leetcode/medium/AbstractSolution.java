@@ -7,5 +7,6 @@ package com.dreams.algorithm.leetcode.medium;
  * @date 2020/9/11 14:39
  * @description TODO
  */
-public class AbstractSolution {
+public abstract class AbstractSolution {
+	void solute(){}
 }

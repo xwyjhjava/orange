@@ -5,6 +5,7 @@ import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 
 /**
+ * @author ming.zhao
  * @version V1.0
  */
 public class WordCount {
@@ -21,10 +22,9 @@ public class WordCount {
 		);
 
 		/** socket流. */
-		DataStream<String> lines = env.socketTextStream("localhost", 9999);
-
+//		DataStream<String> lines = env.socketTextStream("localhost", 9999);
 		/** 文件流. */
-		DataStream<String> lineFile = env.readTextFile("file:///path");
+//		DataStream<String> lineFile = env.readTextFile("file:///path");
 
 		/** 过滤条件. */
 		DataStream<Person> adults = flintstones.filter(new FilterFunction<Person>() {
