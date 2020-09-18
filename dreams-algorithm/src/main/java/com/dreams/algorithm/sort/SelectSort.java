@@ -22,7 +22,7 @@ public class SelectSort extends AbstractSort {
 		}
 		System.out.println("\n");
 	}
-	
+
 	@Override
 	public void sort() {
 
