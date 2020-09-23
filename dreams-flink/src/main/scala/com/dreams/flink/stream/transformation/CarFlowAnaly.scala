@@ -1,7 +1,8 @@
-package com.dreams.flink.stream.source
+package com.dreams.flink.stream.transformation
 
 import java.util.Properties
 
+import org.apache.flink.api.common.functions.ReduceFunction
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.streaming.api.scala.{DataStream, StreamExecutionEnvironment, createTuple2TypeInformation, createTypeInformation}
 import org.apache.flink.streaming.connectors.kafka.{FlinkKafkaConsumer, KafkaDeserializationSchema}
@@ -9,13 +10,14 @@ import org.apache.kafka.clients.consumer.{ConsumerConfig, ConsumerRecord}
 import org.apache.kafka.common.serialization.StringDeserializer
 
 /**
- * @Package com.dreams.flink.stream.source
+ * @Package com.dreams.flink.stream.transformation
  * @author ming
- * @date 2020/9/22 15:42
+ * @date 2020/9/23 16:14
  * @version V1.0
- * @description 读取kafka中的数据
+ * @description
  */
-object ReadFromKafka {
+object CarFlowAnaly {
+
   def main(args: Array[String]): Unit = {
     //kafka 配置信息
     val prop = new Properties()
@@ -46,9 +48,47 @@ object ReadFromKafka {
       }
     }, prop))
 
-    stream.print()
+
+
+    /**
+     * 相同key的数据 一定是由某一个subtask处理
+     * 一个subtask可能会处理多个key所对应的数据
+     */
+
+    // 过滤掉key
+    val valueStream: DataStream[String] = stream.map(_._2)
+
+    //    需求1： 从kafka消费数据， 统计各个卡口的流量
+    valueStream.map(data => {
+      val arr: Array[String] = data.split("\t")
+      val monitorId: String = arr(0)
+      (monitorId, 1)
+    }).keyBy(x => x._1)
+        .reduce(new ReduceFunction[(String, Int)] {
+          override def reduce(value1: (String, Int), value2: (String, Int)): (String, Int) = {
+            (value1._1, value1._2 + value2._2)
+          }
+        }).print()
+
+
+    // 需求2： 从kafka消费数据， 统计每一分钟每个卡口的流量
+    // 解决：  构建组合key
+    valueStream.map(data => {
+      val arr: Array[String] = data.split("\t")
+      val monitorId: String = arr(0)
+      val timestamp: String = arr(2).substring(0, 16)
+      (timestamp + "_"+ monitorId, 1)
+    }).keyBy(v => v._1)
+        .reduce((v1, v2) => {
+          (v1._1, v1._2 + v2._2)
+        }).print()
+
+
+
+
+
+
     environment.execute()
   }
-
 
 }

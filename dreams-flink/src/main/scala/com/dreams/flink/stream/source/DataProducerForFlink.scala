@@ -48,7 +48,7 @@ object DataProducerForFlink {
         val record = new ProducerRecord[String, String]("flink-kafka", i + "", carInfo.toString())
         // 发送数据
         producer.send(record)
-        Thread.sleep(2000)
+        Thread.sleep(1000)
       }
     }
   }
