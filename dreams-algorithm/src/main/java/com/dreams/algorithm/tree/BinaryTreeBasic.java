@@ -15,7 +15,7 @@ public class BinaryTreeBasic {
 
 	public static void main(String[] args) {
 		Queue<String> queue = new LinkedList<>();
-		queue.addAll(Arrays.asList("1", "2", "4", "6", "7", "8", "3", "5"));
+		queue.addAll(Arrays.asList("1", "2", "4", null, "6", "7", null, null, "8", null, null, null, "3", null, "5", null, null));
 		BinaryTreeBasic treeBasic = new BinaryTreeBasic();
 		TreeNode treeNode = treeBasic.buildByPreQueue(queue);
 		System.out.println("build tree node succes");
@@ -77,9 +77,9 @@ public class BinaryTreeBasic {
 		if(node == null){
 			return;
 		}
-		pre(node.left);
+		middle(node.left);
 		System.out.println(node.value + " ");
-		pre(node.right);
+		middle(node.right);
 	}
 
 	/**
@@ -111,8 +111,8 @@ public class BinaryTreeBasic {
 		if(node == null){
 			return;
 		}
-		pre(node.left);
-		pre(node.right);
+		suf(node.left);
+		suf(node.right);
 		System.out.println(node.value + " ");
 	}
 
@@ -329,12 +329,71 @@ public class BinaryTreeBasic {
 	}
 
 
+	/**
+	 *  给定二叉树的某个节点，返回该节点的后继节点
+	 *  二叉树结构如下：
+	 *          class Node{
+	 *              V value;
+	 *              Node left;
+	 *              Node right;
+	 *              Node parent;
+	 *          }
+	 *  后继节点定义： 中序遍历，节点的相对下一个
+	 *  要求时间复杂度为O(K), k为给定的节点和后继节点之间的距离(步长)
+	 */
+	public NodeWithParent findSuccessor(NodeWithParent node){
+
+		if(node == null) {
+			return null;
+		}
+		// 若给定节点有右子树时， 根据中序遍历的要求， 此时后继节点一定在右子树上
+		if(node.right != null){
+			return getLeftMost(node.right);
+		// 给定节点没有右子树时， 就向上找父节点，直到满足关系 node = node.parent.left
+		}else{
+			NodeWithParent parent = node.parent;
+			// 给定节点是父节点的右孩子时， 继续向上找
+			while (parent != null && parent.right == node){
+				// node节点向上移
+				node = parent;
+				parent = node.parent;
+			}
+			return parent;
+		}
+	}
+
+	/**
+	 * 遍历子树，找到最左的节点
+	 * @param rightNode
+	 * @return
+	 */
+	public NodeWithParent getLeftMost(NodeWithParent rightNode){
+		if(rightNode.left != null){
+			getLeftMost(rightNode.left);
+		}
+		return rightNode;
+	}
+
+
+
+
+
+
+
+
 
 }
 
+//  常规二叉树
 class TreeNode{
 	int value;
 	TreeNode left;
 	TreeNode right;
+}
 
+class NodeWithParent{
+	Object value;
+	NodeWithParent left;
+	NodeWithParent right;
+	NodeWithParent parent;
 }
