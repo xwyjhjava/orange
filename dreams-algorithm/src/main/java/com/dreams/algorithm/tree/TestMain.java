@@ -1,5 +1,6 @@
 package com.dreams.algorithm.tree;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -14,18 +15,15 @@ public class TestMain {
 
 	public static void main(String[] args) {
 
-		int a = 0;
-		a++;
-		System.out.println("a = " + a);
+		int result = (0 - 1) / 2;
+		System.out.println("result = " + result);
 
+		String word = "abc";
 
-		Map<String, Integer> map = new HashMap<>();
-		map.put("a", a + 1);
-		map.put("b", a++);
-		System.out.println("map a = " + map.get("a"));
-		System.out.println("map b = " + map.get("b"));
+	}
 
-
+	public static int getDigit(int x, int d){
+		return ((x / ((int)Math.pow(10, d - 1))) % 10);
 	}
 
 }

@@ -27,7 +27,7 @@ public class Problem_141_LinkedListCycle {
 
 		while (slow != fast){
 			// 快慢指针结束
-			if(fast == null || slow == null){
+			if(fast == null || fast.next == null){
 				return false;
 			}
 			slow = slow.next;
