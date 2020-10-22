@@ -176,7 +176,7 @@ public class BinaryTreeBasic {
 
 
 	/**
-	 * 二叉树按层遍历(队列实现)
+	 * 二叉树按层遍历(队列实现) BFS
 	 * @param node
 	 */
 	public void binarySearchByFloor(TreeNode node){
