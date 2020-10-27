@@ -143,7 +143,7 @@ public class BinaryTreeBasic {
 	}
 
 	/**
-	 * 非递归方式实现(一个stack)
+	 * 非递归方式实现后续遍历(一个stack)
 	 * @param h
 	 */
 	public void sufWithNoRecursion_v2(TreeNode h){
