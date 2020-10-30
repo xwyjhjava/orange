@@ -76,4 +76,10 @@ public class DynamicCore {
 		arr[j] = tmp;
 	}
 
+
+
+
+
+
+
 }
