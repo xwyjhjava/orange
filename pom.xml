@@ -19,6 +19,7 @@
         <module>dreams-toutiao</module>
         <module>dreams-spark3.0</module>
         <module>dreams-flink</module>
+        <module>dreams-music</module>
     </modules>
 
     <packaging>pom</packaging>
