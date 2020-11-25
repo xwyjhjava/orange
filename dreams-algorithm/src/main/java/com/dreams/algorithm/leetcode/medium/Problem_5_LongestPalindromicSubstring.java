@@ -14,11 +14,44 @@ public class Problem_5_LongestPalindromicSubstring {
 
 	public static void main(String[] args) {
 		String s = "aacabdkacaa";
-		String ans = longestPalindrome(s);
+		String ans = longestPalindrome_test(s);
 		System.out.println("ans = " + ans);
 	}
 
-	public static String longestPalindrome(String s) {
+
+	/**
+	 * Given a string s, return the longest palindromic substring in s.
+	 *
+	 * 解法： Manacher 算法
+	 * @param s 1 <= s.length <= 1000
+	 *          s consist of only digits and English letters (lower-case and/or upper-case)
+	 * @return
+	 */
+	public static String longestPalindrome(String s){
+		if(s.length() == 1){
+			return s;
+		}
+
+
+
+
+
+		return s;
+	}
+
+	// 回文串的判断
+	public static boolean isPalindrome(String str){
+		String reverse = new StringBuilder(str).reverse().toString();
+		return reverse == str;
+	}
+
+
+	/**
+	 * 尝试
+	 * @param s
+	 * @return
+	 */
+	public static String longestPalindrome_test(String s) {
 		// 1 <= s.length <= 1000
 		if(s.length() == 1){
 			return s;
