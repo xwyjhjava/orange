@@ -1,9 +1,8 @@
 package com.dreams.spark
 
-import java.util.logging.Level
-
+import org.apache.spark.SparkContext
 import org.apache.spark.rdd.RDD
-import org.apache.spark.sql.{DataFrame, SparkSession}
+import org.apache.spark.sql.SparkSession
 
 import scala.util.Random
 
@@ -13,6 +12,7 @@ import scala.util.Random
  * @date 2020/1/7 10:28
  * @version V1.0
  * @description demo helloworld
+ *              源码分析
  */
 object WordCount {
 
@@ -23,39 +23,17 @@ object WordCount {
       .master("local[2]")
       .getOrCreate()
 
-//    spark.read.csv("")
+    val sc: SparkContext = spark.sparkContext
+    val fileRDD: RDD[String] = sc.textFile("data/testdata.txt")
+    val wordRDD: RDD[String] = fileRDD.flatMap(x => {x.split(" ")})
+    val pairRDD: RDD[(String, Int)] = wordRDD.map((_, 1))
+    //=======shuffle============
+    val reduceRDD: RDD[(String, Int)] = pairRDD.reduceByKey(_ + _)
 
-    val sc = spark.sparkContext
-    sc.setLogLevel("ERROR")
+    val reverseRDD: RDD[(Int, Int)] = reduceRDD.map(x => (x._2, 1))
+    reverseRDD.foreach(println)
 
-    //prepare data
-    val array = Array.apply(("A", 1), ("B", 2), ("A", 3))
-    //make rdd
-    val rdd = sc.makeRDD(array)
-    //map and reduce
-//    rdd.map(x => {
-//      (x._1, x._2 + 1)
-//    }).collect().foreach(println)
-//    println("============================")
-//    rdd.flatMap(x => List((x._1, x._2 + 1)))
-//      .foreach(println)
-//    println("===========================")
-
-
-
-    val random = new Random()
-    val new_rdd: RDD[(String, Int)] = rdd.map(x => {
-
-      val new_key: String = x._1 + "_" + random.nextInt(10)
-      (new_key, x._2)
-    })
-
-    new_rdd.foreach(println)
-
-    val fileRDD: RDD[String] = sc.textFile("")
-//    fileRDD.flatMap()
-
-
+    reverseRDD.distinct()
 
   }
 
