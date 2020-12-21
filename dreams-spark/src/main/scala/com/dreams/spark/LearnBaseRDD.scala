@@ -2,7 +2,7 @@ package com.dreams.spark
 
 import org.apache.spark.SparkContext
 import org.apache.spark.rdd.RDD
-import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql.{SQLContext, SparkSession}
 
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
@@ -37,6 +37,8 @@ object LearnBaseRDD {
 
     val sc: SparkContext = sparkSession.sparkContext
     sc.setLogLevel("ERROR")
+
+
 
     val rdd1: RDD[Int] = sc.parallelize(List(1, 2, 3, 4, 5))
     val rdd2: RDD[Int] = sc.parallelize(List(3, 4, 5, 6, 7))
@@ -390,8 +392,9 @@ object LearnBaseRDD {
     })
 
     // 解法一
-    // 风险点： 1. groupByKey可能会造成某个key的value特别多时, 有OOM的风险
-    //         2. 申请了额外了HashMap空间
+    // 1. groupByKey可能会造成某个key的value特别多时, 有OOM的风险
+    // 2. 申请了额外了HashMap空间
+    // 3. 且自己的算子实现了函数：去重、排序
 //    val grouped: RDD[((Int, Int), Iterable[(Int, Int)])] = baseRDD.map(t4 => ((t4._1, t4._2), (t4._3, t4._4))).groupByKey()
 //    val res: RDD[((Int, Int), List[(Int, Int)])] = grouped.mapValues(arr => {
 //      val map = new mutable.HashMap[Int, Int]()
@@ -411,7 +414,8 @@ object LearnBaseRDD {
 
 
     // 解法2
-    // 解决了去重
+    // 1. 解决了去重
+    // 2. 用了groupByKey  容易OOM  取巧：spark rdd  reduceByKey 的取 max间接达到去重  让自己的算子变动简单点
 //    val reduced: RDD[((Int, Int, Int), Int)] = baseRDD.map(t4 => ((t4._1, t4._2, t4._3), t4._4))
 //      .reduceByKey((x, y) => if (x > y) x else y)
 //    val mapped: RDD[((Int, Int), (Int, Int))] = reduced.map(t2 => ((t2._1._1, t2._1._2), (t2._1._3, t2._2)))
@@ -422,7 +426,8 @@ object LearnBaseRDD {
     // 解法3
     // 虽然第一步完成了数据的全排序, 但是在后续的shuffle步骤中，可能会打乱顺序
     // 打乱排序的原因： 排序时是按照年月温度， 而reduce时是按照年月日。 年月日不是年月温度的子集，所以会造成排序打乱
-
+    // 1. 用了groupByKey  容易OOM  取巧：用了spark 的RDD 的reduceByKey 去重，用了sortByKey 排序
+    // 2. 注意：多级shuffle关注 后续shuffle的key一定得是前置rdd  key的子集
 //    val sorted: RDD[(Int, Int, Int, Int)] = baseRDD.sortBy(t4 => (t4._1, t4._2, t4._4), false)
 //    val reduced: RDD[((Int, Int, Int), Int)] = sorted.map(t4 => ((t4._1, t4._2, t4._3), t4._4)).reduceByKey((x, y) => if (x > y) x else y)
 //    val mapped: RDD[((Int, Int), (Int, Int))] = reduced.map(t2 => ((t2._1._1, t2._1._2), (t2._1._3, t2._2)))
@@ -432,23 +437,78 @@ object LearnBaseRDD {
 
     // 解法4
     // 只有当sorted后续的shuffle的key是sorted的子集时，排序才不会被打乱
-    val sorted: RDD[(Int, Int, Int, Int)] = baseRDD.sortBy(t4 => (t4._1, t4._2, t4._4), false)
-    val grouped: RDD[((Int, Int), Iterable[(Int, Int)])] = sorted.map(t4 => ((t4._1, t4._2), (t4._3, t4._4))).groupByKey()
-    grouped.mapValues(arr => arr.toList.take(2)).foreach(println)
+    // 1. 用了groupByKey  容易OOM  取巧：用了spark 的RDD  sortByKey 排序  没有破坏多级shuffle的key的子集关系
+//    val sorted: RDD[(Int, Int, Int, Int)] = baseRDD.sortBy(t4 => (t4._1, t4._2, t4._4), false)
+//    val grouped: RDD[((Int, Int), Iterable[(Int, Int)])] = sorted.map(t4 => ((t4._1, t4._2), (t4._3, t4._4))).groupByKey()
+//    grouped.mapValues(arr => arr.toList.take(2)).foreach(println)
 
 
     // 解法5
-
-    val kv: RDD[((Int, Int), (Int, Int))] = baseRDD.map(t4 => ((t4._1, t4._2), (t4._3, t4._4)))
-    kv.combineByKey(
+    //分布式计算的核心思想：调优天下无敌：combineByKey
+    //分布式是并行的，离线批量计算有个特征就是后续步骤(stage)依赖前一步骤(stage)
+    //如果前一步骤(stage)能够加上正确的combineByKey
+    //我们自定的combineByKey的函数，是尽量压缩内存中的数据
+    val kv: RDD[((Int, Int), (Int, Int))] = baseRDD
+      .map(t4 => ((t4._1, t4._2), (t4._3, t4._4))) // year, month, day, temperature
+    val res: RDD[((Int, Int), Array[(Int, Int)])] = kv.combineByKey(
       // 第一条记录的value怎么放
-      (v:(Int, Int)) => {Array(v, (0,0),(0,0))},
+      (v: (Int, Int)) => {
+        Array(v, (0, 0), (0, 0))
+      },
       // 第二条以及后续的怎么做
-      (oldValue:Array[(Int, Int)], newValue:Array[(Int, Int)]) => {
+      (oldValue: Array[(Int, Int)], newValue: (Int, Int)) => {
+        // 去重、排序
+        var flg = 0
+        // 后续进来的元素， 要么day和 oldValue的day的相同， 要么不相同
+        for (i <- 0 until oldValue.length) {
+          // 如果day相同
+          if (oldValue(i)._1 == newValue._1) {
+            // 比较温度
+            if (oldValue(i)._2 < newValue._2) {
+              // 如果新温度大, 更新温度
+              flg = 1
+              oldValue(i) == newValue
+            } else {
+              flg = 2
+            }
+          }
+        }
+        if (flg == 0) {
+          oldValue(oldValue.length - 1) = newValue
+        }
+        // sorted 是转换算子，内部实现会new新的数组, 且由于combineByKey的第二个函数调用次数多, 有可能会造成GC
+//        oldValue.sorted
+        scala.util.Sorting.quickSort(oldValue)
+        oldValue
+      },
 
+      // merge
+      (v1: Array[(Int, Int)], v2: Array[(Int, Int)]) => {
+        // 关注去重
+        val union: Array[(Int, Int)] = v1.union(v2)
+        union.sorted
       }
-
     )
+//    res.map(x => (x._1, x._2.toList)).foreach(println)
+
+
+
+    // ==================== 例子 ===============
+
+    val data_example: RDD[String] = sc.parallelize(List(
+      "hello world",
+      "hello spark",
+      "hello world",
+      "hello hadoop",
+      "hello world",
+      "hello msb",
+      "hello world"
+    ))
+
+    val words_example: RDD[String] = data_example.flatMap(_.split(" "))
+    val kv_example: RDD[(String, Int)] = words_example.map((_, 1))
+
+
 
 
 

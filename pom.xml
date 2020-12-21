@@ -20,6 +20,7 @@
         <module>dreams-spark3.0</module>
         <module>dreams-flink</module>
         <module>dreams-music</module>
+        <module>dreams-datacenter</module>
     </modules>
 
     <packaging>pom</packaging>

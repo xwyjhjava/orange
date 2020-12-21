@@ -11,7 +11,8 @@ import java.util.concurrent.CountDownLatch;
 /**
  * wait and notified
  */
-public class SyncExample {
+public class
+SyncExample {
 
 
     private static CountDownLatch latch = new CountDownLatch(1);

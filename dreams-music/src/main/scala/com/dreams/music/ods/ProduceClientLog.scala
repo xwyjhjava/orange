@@ -28,7 +28,7 @@ object ProduceClientLog {
   def main(args: Array[String]): Unit = {
     /**
       * 先判断有没有传递一个参数
-      *  指定当前log数据的日期时间 格式：20201231
+      *  1.指定当前log数据的日期时间 格式：20201231
       *  2.指定当前log的上传路径：例如 : ./MusicProject/data/currentday_clientlog.tar.gz
       */
     if(args.length<1){
@@ -46,7 +46,10 @@ object ProduceClientLog {
       clientLogInfos = sc.textFile(
         "D:\\idea2019.3workspace\\MusicProject\\data\\currentday_clientlog.tar.gz")
     }else{
-      sparkSession = SparkSession.builder().appName("ProduceClientLog").enableHiveSupport().getOrCreate()
+      sparkSession = SparkSession.builder()
+        .appName("ProduceClientLog")
+        .enableHiveSupport()
+        .getOrCreate()
       sc = sparkSession.sparkContext
       clientLogInfos = sc.textFile(s"${hdfsclientlogpath}/currentday_clientlog.tar.gz")
     }
@@ -108,13 +111,13 @@ object ProduceClientLog {
         |)
         |partitioned by (data_dt string)
         |ROW FORMAT DELIMITED  FIELDS TERMINATED BY '\t'
-        |LOCATION 'hdfs://mycluster/user/hive/warehouse/data/song/TO_CLIENT_SONG_PLAY_OPERATE_REQ_D'
+        |LOCATION 'hdfs://192.168.43.26:9000/user/hive/warehouse/data/song/TO_CLIENT_SONG_PLAY_OPERATE_REQ_D'
       """.stripMargin)
 
     sparkSession.sql(
       s"""
         | load data inpath
-        | 'hdfs://mycluster/logdata/all_client_tables/${logDate}/MINIK_CLIENT_SONG_PLAY_OPERATE_REQ'
+        | 'hdfs://192.168.43.26:9000/logdata/all_client_tables/${logDate}/MINIK_CLIENT_SONG_PLAY_OPERATE_REQ'
         | into table TO_CLIENT_SONG_PLAY_OPERATE_REQ_D partition (data_dt='${logDate}')
       """.stripMargin)
 
