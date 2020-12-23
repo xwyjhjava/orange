@@ -12,6 +12,7 @@ object ConfigUtils {
   val HIVE_METASTORE_URIS = load.getString("hive.metastore.uris")
   val HIVE_DATABASE = load.getString("hive.database")
   val HDFS_CLIENT_LOG_PATH = load.getString("clientlog.hdfs.path")
+  val HDFS_STUDY_ASK_PATH = load.getString("studyask.hdfs.path")
   val MYSQL_URL = load.getString("mysql.url")
   val MYSQL_USER = load.getString("mysql.user")
   val MYSQL_PASSWORD = load.getString("mysql.password")
