@@ -8,6 +8,8 @@ import org.apache.spark.sql.{DataFrame, Dataset, Row, SQLContext, SaveMode, Spar
 import scala.collection.mutable
 import scala.io.{BufferedSource, Source}
 import scala.util.Random
+import com.github.nscala_time.time.Imports._
+import org.joda.time.DateTime
 
 /**
  * @Package com.dreams.test
@@ -28,7 +30,10 @@ object TestMainScala {
 //    saveCsvFile()
 //    contextSaveTest()
 //    logDataCompare()
-    isHit()
+//    isHit()
+
+//    read_top_data()
+    truncateDateTime()
   }
 
   def run01(): Unit ={
@@ -311,12 +316,81 @@ object TestMainScala {
 
 
   def sortTest(): Unit ={
+  }
 
 
+  def read_ask_log(): Unit ={
 
+    val sparkSession: SparkSession = SparkSession.builder()
+      .appName("read log")
+      .master("local")
+      .getOrCreate()
+
+    val sc: SparkContext = sparkSession.sparkContext
+    sc.setLogLevel("ERROR")
+
+    val rdd: RDD[String] = sc.textFile("D:\\data\\ask_log_test.csv")
+    val count: Long = rdd.count()
+    println(s"count: ${count}")
+
+    rdd.take(2).foreach(println)
 
   }
 
+
+  def read_top_data(): Unit ={
+
+    val sparkSession: SparkSession = SparkSession.builder()
+      .appName("read log")
+      .master("local")
+      .getOrCreate()
+
+    val sc: SparkContext = sparkSession.sparkContext
+    sc.setLogLevel("ERROR")
+
+    val rdd: RDD[String] = sc.textFile("D:\\data\\top.csv")
+    val count: Long = rdd.count()
+    println(s"count: ${count}")
+
+    val state_city_RDD: RDD[(String, String)] = rdd.map(_.split(",")).map(arr => {
+      (arr(5), arr(4))
+    })
+
+    val city_rest_RDD: RDD[(String, String)] = rdd.map(_.split(",")).map(arr => {
+      (arr(4), arr(1))
+    })
+
+    val groupCount: Long = state_city_RDD.groupByKey().count()
+    println("groupCount", groupCount)
+
+    val groupCount2: Long = city_rest_RDD.groupByKey().count()
+    println("groupCount2", groupCount2)
+//    rdd.take(2).foreach(println)
+
+  }
+
+
+  def truncateDateTime(): Unit ={
+
+    val now: DateTime = DateTime.now()
+    println(now.toString("yyyy-MM-dd HH:mm:ss"))
+
+    println(now.minute.get() % 10)
+
+    println(40 % 10)
+
+
+    val time: DateTime = now.minusMinutes(now.minute.get())
+    println(time.toString("yyyy-MM-dd HH:mm"))
+
+
+    val time1: DateTime = DateTime.now().withTimeAtStartOfDay().plusMinutes(30)
+    val startTime = time1.toString("yyyy-MM-dd HH:mm:ss")
+
+    println(startTime == "2021-05-14 00:30:00")
+
+
+  }
 
 
 }

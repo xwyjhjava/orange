@@ -2,6 +2,9 @@ package com.dreams.common;
 
 import java.time.*;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAdjusters;
+import java.time.temporal.WeekFields;
+import java.util.Locale;
 
 /**
  * @author ming
@@ -15,15 +18,29 @@ public class LocalDateUtils {
 
     public static void main(String[] args) {
 
-        System.out.println(getDateTimeDiff("2019-12-20 23:59:50", "2019-12-30 23:15:26", "yyyy-MM-dd HH:mm:ss", "day"));
+//        System.out.println(getDateTimeDiff("2019-12-20 23:59:50", "2019-12-30 23:15:26", "yyyy-MM-dd HH:mm:ss", "day"));
+//
+//        System.out.println(getDateBefore("2019-12-30", 10, false, "yyyy-MM-dd"));
+//
+//        System.out.println(getPeriodOfDay("03:53:20", "HH:mm:ss"));
+//
+//        System.out.println(getLocalByGMT(getGMTInstant().toString()));
+//
+//        System.out.println(getDatetimeFromInstant(LocalDateTime.now().toEpochSecond(ZoneOffset.of("+8"))));
 
-        System.out.println(getDateBefore("2019-12-30", 10, false, "yyyy-MM-dd"));
 
-        System.out.println(getPeriodOfDay("03:53:20", "HH:mm:ss"));
+        LocalDate now = LocalDate.now();
+        LocalDate monday = now.with(DayOfWeek.MONDAY);
+        System.out.println("monday = " + monday.toString());
+        LocalDate sunday = now.with(DayOfWeek.SUNDAY);
+        System.out.println("sunday = " + sunday.toString());
 
-        System.out.println(getLocalByGMT(getGMTInstant().toString()));
+//        int value = now.getDayOfWeek().getValue();
+//        System.out.println("value = " + value);
 
-        System.out.println(getDatetimeFromInstant(LocalDateTime.now().toEpochSecond(ZoneOffset.of("+8"))));
+//        String s = now.toString();
+//        System.out.println("s = " + s);
+
     }
 
     //get Date
@@ -133,6 +150,7 @@ public class LocalDateUtils {
     public static LocalDateTime getDatetimeFromInstant(long timestap) {
         Instant instant = Instant.ofEpochSecond(timestap);
         LocalDateTime dateTime = LocalDateTime.ofInstant(instant, ZoneOffset.systemDefault());
+
         return dateTime;
     }
 

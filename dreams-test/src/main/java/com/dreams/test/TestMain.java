@@ -8,8 +8,13 @@ import java.net.*;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+
+
 
 /**
  * @author ming
@@ -245,6 +250,48 @@ public class TestMain {
 
 
     }
+
+
+
+    @Test
+    public void bubbleSortTest(){
+        int[] a = {1, 4, 3, 7, 9};
+
+        for(int i = 0; i < a.length; i++){
+            for(int j = i + 1; j < a.length; j++){
+                if(a[i] < a[j]){
+                    int tmp = a[i];
+                    a[i] = a[j];
+                    a[j] = tmp;
+                }
+            }
+        }
+
+
+        for (int i = 0; i < a.length; i++) {
+            System.out.println("i = " + a[i]);
+        }
+
+
+    }
+
+
+
+    @Test
+    public void truncateTime(){
+
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime localDateTime = now.truncatedTo(ChronoUnit.MINUTES);
+
+        System.out.println("localDateTime = " + localDateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+
+
+
+    }
+
+
+
+
 
 
 }
