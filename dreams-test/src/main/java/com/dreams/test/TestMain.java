@@ -8,12 +8,14 @@ import java.net.*;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
-
+import java.util.Stack;
 
 
 /**
@@ -290,8 +292,240 @@ public class TestMain {
     }
 
 
+    @Test
+    public void hivesubstring(){
+        String logtime = "2019-07-15 00:00:00";
+        String newstring = logtime.substring(0, 10);
+        System.out.println("newstring = " + newstring);
+    }
 
 
 
+    @Test
+    public void conpareTwoArray(){
+
+//        List<String> A = new ArrayList<>();
+
+        // 比较A 集合内与
+        List<BStudent> A = new ArrayList<>();
+        BStudent student = new BStudent();
+        student.setName("悠米");
+        student.setSex("公");
+        A.add(student);
+
+        BStudent student1 = new BStudent();
+        student1.setName("测试");
+        student1.setSex("母");
+        A.add(student1);
+
+        BStudent student7 = new BStudent();
+        student7.setName("测试");
+        student7.setSex("母");
+        A.add(student7);
+
+
+        List<BStudent> B = new ArrayList<>();
+        BStudent student2 = new BStudent();
+        student2.setName("悠米");
+        student2.setSex("公");
+        B.add(student2);
+
+        BStudent student3 = new BStudent();
+        student3.setName("测试");
+        student3.setSex("母");
+        B.add(student3);
+
+        BStudent student4 = new BStudent();
+        student4.setName("第二组");
+        student4.setSex("男");
+        B.add(student4);
+
+        BStudent student5 = new BStudent();
+        student5.setName("第二组");
+        student5.setSex("女");
+        B.add(student5);
+
+
+        // 重写equlas方法，设定name作为关键区分
+        List<BStudent> result = new ArrayList<>();
+
+        // 循环遍历 List A
+        for(int i = 0; i < A.size(); i++){
+            BStudent cur = A.get(i);
+            // 如果B中存在，则add到result中
+            if(B.contains(cur)){
+                result.add(cur);
+            }
+
+        }
+    }
+
+
+    @Test
+    public void containsTest(){
+
+        BStudent A = new BStudent();
+        A.setSex("male");
+        A.setName("zhangsan");
+
+        BStudent B = new BStudent();
+        B.setSex("female");
+        B.setName("zhangsan");
+
+        List<BStudent> students = new ArrayList<>();
+        students.add(A);
+
+
+
+    }
+
+    @Test
+    public void findTwoFactor(){
+        List<A> aList = new ArrayList<>();
+        List<B> bList = new ArrayList<>();
+
+        //init
+        A a0 = new A();
+        a0.setNo(0);
+        A a1 = new A();
+        a1.setNo(1);
+        A a2 = new A();
+        a2.setNo(2);
+        A a3 = new A();
+        a3.setNo(3);
+
+        aList.add(a0);
+        aList.add(a1);
+        aList.add(a2);
+        aList.add(a3);
+
+        B b0 = new B();
+        b0.setNo(0);
+        b0.setName("TTC");
+
+        B b1 = new B();
+        b1.setNo(1);
+        b1.setName("TTC");
+
+        B b2 = new B();
+        b2.setNo(2);
+        b2.setName("CCG");
+
+        B b3 = new B();
+        b3.setNo(3);
+        b3.setName("CCG");
+
+//        bList.add(b0);
+//        bList.add(b1);
+        bList.add(b2);
+        bList.add(b3);
+
+        List<String> result = new ArrayList<>();
+
+        for(int i = 0; i < bList.size(); i+=2){ //循环B
+
+            int index = i;
+            int size = 0;
+            for(int j = 0; j < aList.size(); j++){
+                // 第一个B值
+                A curA = aList.get(j);
+                if(curA.getNo() == bList.get(index).getNo()){ // 如果B0在A中能找到，则直接去找B1
+                    size++;
+                    index++; // index会多加一次，取值时减一
+                    j = -1;
+                }
+                if(size == 2){ //如果已经找全了两个，则直接取值, 跳出循环
+                    result.add(bList.get(index - 1).getName());
+                    break;
+                }
+            }
+
+        }
+
+        for(String ans : result){
+            System.out.println(ans);
+        }
+
+
+
+    }
+
+    @Test
+    public void testCalendar(){
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        Calendar calendar = Calendar.getInstance();
+    }
+}
+
+class A {
+    private int no;
+
+    public int getNo() {
+        return no;
+    }
+
+    public void setNo(int no) {
+        this.no = no;
+    }
+}
+
+class B {
+    private int no;
+    private String name;
+
+    public int getNo() {
+        return no;
+    }
+
+    public void setNo(int no) {
+        this.no = no;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+}
+
+
+
+class BStudent{
+    private String name;
+    private String sex;
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getSex() {
+        return sex;
+    }
+
+    public void setSex(String sex) {
+        this.sex = sex;
+    }
+
+    // 重写equals
+
+
+    @Override
+    public boolean equals(Object obj) {
+        if(obj == null){
+            return false;
+        }
+        BStudent student = (BStudent) obj;
+        if(name.equals(student.name)){
+            return true;
+        }
+        return false;
+    }
 
 }
+

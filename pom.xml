@@ -21,6 +21,7 @@
         <module>dreams-flink</module>
         <module>dreams-music</module>
         <module>dreams-datacenter</module>
+        <module>dreams-iceberg</module>
     </modules>
 
     <packaging>pom</packaging>

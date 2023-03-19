@@ -12,18 +12,6 @@ import java.util.List;
  */
 public class DynamicCore {
 
-	public static void main(String[] args) {
-		String str = "abc";
-		char[] arr = str.toCharArray();
-		List<String> ans = new ArrayList<>();
-		String path = "";
-		process2(arr, 0, ans);
-		for (String ele: ans){
-			System.out.println("ele => " + ele);
-		}
-	}
-
-
 	/**
 	 * 打印一个字符串的全部子序列
 	 * @param arr
@@ -77,6 +65,9 @@ public class DynamicCore {
 	}
 
 
+	public static void main(String[] args) {
+
+	}
 
 
 

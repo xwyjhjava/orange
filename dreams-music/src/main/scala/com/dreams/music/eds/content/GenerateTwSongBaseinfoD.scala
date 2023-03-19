@@ -24,6 +24,7 @@ object GenerateTwSongBaseinfoD {
   val getAlbumName : String => String = (albumInfo:String) => {
     var albumName = ""
     try{
+
       val jsonArray: JSONArray = JSON.parseArray(albumInfo)
       albumName = jsonArray.getJSONObject(0).getString("name")
     }catch{
