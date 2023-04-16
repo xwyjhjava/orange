@@ -10,10 +10,12 @@ import java.util.List;
  * @date 2020/10/20 11:13
  * @description TODO
  */
+
+// 点的描述
 public class Node {
-	int  value;
-	int in;
-	int out;
+	int value; // 编号
+	int in; // 入度
+	int out; // 出度
 	List<Node> nexts;
 	List<Edge> edges;
 
